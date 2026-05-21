@@ -1242,17 +1242,18 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Summary lede on the left (Total as the editorial focal point), Success and
-   Error as compact inline stats on the right. */
+/* One summary block on the left: eyebrow, Total as the lede, delta, and a
+   substat row with Success/Error. Right side of the header is intentionally
+   empty so the eye anchors on the headline number then traces down to the
+   secondary metrics, in a single visual unit. */
 .chart-header {
   display: flex;
   align-items: flex-end;
-  justify-content: space-between;
   gap: var(--space-6);
   margin-bottom: var(--space-3);
 }
 
-.chart-lede {
+.chart-summary {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -1271,7 +1272,7 @@
   opacity: 0.5;
 }
 
-.chart-lede-value {
+.chart-summary-value {
   font-weight: var(--weight-semibold);
   font-size: 36px;
   line-height: 1;
@@ -1281,7 +1282,7 @@
   margin-top: 4px;
 }
 
-.chart-lede-delta {
+.chart-summary-delta {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -1289,16 +1290,15 @@
   color: var(--color-text-muted);
   margin-top: 2px;
 }
-.chart-lede-delta-label {
+.chart-summary-delta-label {
   font-style: italic;
 }
 
-/* Success / Error compact inline cluster on the right. */
-.chart-stats {
+.chart-substats {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-5);
-  padding-bottom: 6px; /* aligns visually with the lede's delta baseline */
+  gap: var(--space-4);
+  margin-top: var(--space-2);
 }
 
 .stat {
@@ -1311,15 +1311,15 @@
 
 .stat::before {
   content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: var(--radius-full);
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
   background: var(--color-text-muted);
   transform: translateY(-1px);
   flex-shrink: 0;
 }
-.stat[data-dot='success']::before { background: var(--color-status-success); }
-.stat[data-dot='error']::before   { background: var(--color-status-error); }
+.stat[data-dot='success']::before { background: var(--color-chart-success); }
+.stat[data-dot='error']::before   { background: var(--color-chart-error); }
 
 .stat-label {
   color: var(--color-text-muted);

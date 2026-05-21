@@ -145,8 +145,11 @@
   --color-method-patch: var(--amber-500);
   --color-method-delete: var(--red-500);
 
-  --color-chart-success: var(--green-500);
-  --color-chart-error: var(--red-500);
+  /* Chart palette — intentionally softer than the saturated brand status
+     colors. Bars read as data density, not as alarm signals. The brand
+     greens/reds stay reserved for status pills and accents. */
+  --color-chart-success: #59CCA0;
+  --color-chart-error: #F0A89E;
   --color-chart-grid: var(--grey-200);
   --color-chart-axis: var(--grey-400);
 
@@ -192,6 +195,8 @@
   --color-status-info: #a499e8;
   --color-status-info-soft: color-mix(in srgb, #a499e8 20%, transparent);
 
+  --color-chart-success: #4DBB8F;
+  --color-chart-error: #D88B7F;
   --color-chart-grid: var(--grey-700);
   --color-chart-axis: var(--grey-500);
 
