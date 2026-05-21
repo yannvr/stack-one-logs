@@ -253,7 +253,7 @@ export function LogsPage() {
   return (
     <div className="logs-page">
       <Sidebar />
-      <div className="main">
+      <main className="main">
         <TopBar title="Request Logs" />
         <div className="main-content">
           {!isEmptyDemo && (
@@ -266,7 +266,7 @@ export function LogsPage() {
           ))}
           {logsLoading ? <TableSkeleton /> : detailContent}
         </div>
-      </div>
+      </main>
 
       <LogsDetail
         log={selectedLog}
