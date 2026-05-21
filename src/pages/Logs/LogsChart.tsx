@@ -23,29 +23,29 @@ export function LogsChart({ summary, onBucketClick }: Props) {
   return (
     <section className="chart-card" aria-labelledby="chart-heading">
       <header className="chart-header">
-        <div className="chart-summary">
+        <div className="chart-hero">
           <span className="chart-eyebrow" id="chart-heading">
             API Requests <span className="dot-sep">·</span> last 12 minutes
           </span>
-          <span className="chart-summary-value">{formatCount(summary.totals.total)}</span>
-          <span className="chart-summary-delta">
+          <span className="chart-hero-value">{formatCount(summary.totals.total)}</span>
+          <span className="chart-hero-delta">
             <Delta value={summary.totals.totalDelta} />
-            <span className="chart-summary-delta-label">vs prior period</span>
+            <span className="chart-hero-delta-label">vs prior period</span>
           </span>
-          <div className="chart-substats">
-            <Stat
-              label="Success"
-              value={summary.totals.success}
-              delta={summary.totals.successDelta}
-              dot="success"
-            />
-            <Stat
-              label="Error"
-              value={summary.totals.error}
-              delta={summary.totals.errorDelta}
-              dot="error"
-            />
-          </div>
+        </div>
+        <div className="chart-stats">
+          <Stat
+            label="Success"
+            value={summary.totals.success}
+            delta={summary.totals.successDelta}
+            dot="success"
+          />
+          <Stat
+            label="Error"
+            value={summary.totals.error}
+            delta={summary.totals.errorDelta}
+            dot="error"
+          />
         </div>
       </header>
       <ParentSize parentSizeStyles={{ height: CHART_HEIGHT }}>

@@ -1242,28 +1242,29 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* One summary block on the left: eyebrow, Total as the lede, delta, and a
-   substat row with Success/Error. Right side of the header is intentionally
-   empty so the eye anchors on the headline number then traces down to the
-   secondary metrics, in a single visual unit. */
+/* Phase A's original layout, which the user identified as the visual reference:
+   - Hero column on the LEFT: eyebrow + big total + delta line.
+   - Two stat columns on the RIGHT: each is a small vertical stack of
+     uppercase tracked label (with a colored dot) + bold value + small delta.
+   The two halves are spaced by space-between so they breathe across the card. */
 .chart-header {
   display: flex;
   align-items: flex-end;
+  justify-content: space-between;
   gap: var(--space-6);
   margin-bottom: var(--space-3);
 }
 
-.chart-summary {
+.chart-hero {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  flex-shrink: 0;
+  gap: var(--space-1);
 }
 
 .chart-eyebrow {
   text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: 10px;
+  letter-spacing: 0.18em;
+  font-size: var(--text-xs);
   font-weight: var(--weight-medium);
   color: var(--color-text-muted);
 }
@@ -1272,65 +1273,70 @@
   opacity: 0.5;
 }
 
-.chart-summary-value {
+.chart-hero-value {
   font-weight: var(--weight-semibold);
-  font-size: 36px;
+  font-size: 40px;
   line-height: 1;
   letter-spacing: -0.025em;
   font-variant-numeric: tabular-nums;
   color: var(--color-text-primary);
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
-.chart-summary-delta {
+.chart-hero-delta {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   font-size: var(--text-xs);
   color: var(--color-text-muted);
-  margin-top: 2px;
 }
-.chart-summary-delta-label {
+.chart-hero-delta-label {
   font-style: italic;
 }
 
-.chart-substats {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-4);
-  margin-top: var(--space-2);
+/* Stat columns on the right — end-aligned, uppercase labels, bold values. */
+.chart-stats {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-6);
 }
 
 .stat {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  font-size: var(--text-sm);
-  line-height: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: right;
+  align-items: flex-end;
 }
-
-.stat::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border-radius: 2px;
-  background: var(--color-text-muted);
-  transform: translateY(-1px);
-  flex-shrink: 0;
-}
-.stat[data-dot='success']::before { background: var(--color-chart-success); }
-.stat[data-dot='error']::before   { background: var(--color-chart-error); }
 
 .stat-label {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
   color: var(--color-text-muted);
-  font-weight: var(--weight-regular);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-content: flex-end;
 }
+.stat-label::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-text-muted);
+}
+.stat[data-dot='success'] .stat-label::before { background: var(--color-chart-success); }
+.stat[data-dot='error']   .stat-label::before { background: var(--color-chart-error); }
 
 .stat-value {
-  color: var(--color-text-primary);
+  font-size: var(--text-xl);
   font-weight: var(--weight-semibold);
+  line-height: 1;
+  letter-spacing: -0.015em;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.005em;
+  color: var(--color-text-primary);
 }
 
 .stat-delta {
@@ -1429,7 +1435,7 @@
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
-  background: var(--color-bg-elevated);
+  background: var(--color-bg-subtle);
   border-bottom: 1px solid var(--color-border-default);
   padding: var(--space-3) var(--space-4);
   text-align: left;

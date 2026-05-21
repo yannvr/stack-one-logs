@@ -51,13 +51,23 @@ export function LogsPage() {
     [filters.query, filters.range, isEmptyDemo],
   );
 
-  const { data: logsResult, loading: logsLoading, refetch } = useQuery(fetchLogs, [
+  const { data: logsResult, loading: logsLoading, refetch: refetchLogs } = useQuery(fetchLogs, [
     filters.query,
     filters.range?.from?.toISOString(),
     filters.range?.to?.toISOString(),
     isEmptyDemo,
   ]);
-  const { data: summary, loading: summaryLoading } = useQuery(() => getChartSummary(), []);
+  const { data: summary, loading: summaryLoading, refetch: refetchSummary } = useQuery(
+    () => getChartSummary(),
+    [],
+  );
+
+  // A single Refresh action refreshes both the chart and the table. Both go
+  // back into their loading states (skeletons) so the refresh is visible.
+  const refetch = useCallback(() => {
+    refetchLogs();
+    refetchSummary();
+  }, [refetchLogs, refetchSummary]);
 
   const logs = logsResult?.logs ?? [];
   const hasLogs = logs.length > 0;
