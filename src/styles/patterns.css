@@ -414,20 +414,58 @@
 }
 .sub-accordion .accordion-item:last-child { border-bottom: none; }
 
+.sub-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-right: var(--space-4);
+  background: var(--color-bg-canvas);
+  transition: background var(--motion-fast) var(--ease-out);
+}
+.sub-row:hover { background: var(--color-bg-row-hover); }
+
 .sub-toggle {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  width: 100%;
+  flex: 1;
   padding: var(--space-2) var(--space-4);
-  background: var(--color-bg-canvas);
+  background: transparent;
+  border: none;
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
   font-weight: var(--weight-medium);
+  text-align: left;
+  cursor: pointer;
 }
-.sub-toggle:hover { background: var(--color-bg-row-hover); }
-.sub-toggle .caret { transition: transform var(--motion-fast) var(--ease-out); color: var(--color-text-muted); }
+.sub-toggle:disabled { cursor: default; opacity: 1; }
+.sub-toggle .caret { transition: transform var(--motion-fast) var(--ease-out); color: var(--color-text-muted); flex-shrink: 0; }
 .sub-toggle[data-state='open'] .caret { transform: rotate(90deg); }
+.caret-placeholder { width: 10px; height: 10px; display: inline-block; }
+
+.sub-trailing {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.not-available {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+  cursor: help;
+  border-bottom: 1px dashed var(--color-border-strong);
+  padding-bottom: 1px;
+}
+.not-available:hover,
+.not-available:focus-visible {
+  color: var(--color-text-secondary);
+}
 
 .sub-body {
   padding: var(--space-3) var(--space-4);
@@ -649,12 +687,81 @@
   color: var(--color-text-primary);
   display: flex;
   flex-direction: column;
+  gap: var(--space-5);
+}
+
+.explainer-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.explainer-section h4 {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-text-muted);
+}
+.explainer-section p {
+  color: var(--color-text-secondary);
+  line-height: 1.55;
+}
+.explainer-section p code,
+.explainer-section li code {
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  padding: 1px 4px;
+  font-size: 0.9em;
+  color: var(--color-text-primary);
+}
+
+.resolution-steps {
+  padding-left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  counter-reset: step;
+  list-style: none;
+}
+.resolution-steps > li {
+  counter-increment: step;
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: var(--space-2);
+  align-items: start;
+}
+.resolution-steps > li::before {
+  content: counter(step);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-hover);
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+.resolution-steps > li p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.explainer-body .sources {
+  list-style: none;
+  padding-left: 0;
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--space-3);
 }
-.explainer-body h4 { font-size: var(--text-md); font-weight: var(--weight-semibold); margin-bottom: -8px; }
-.explainer-body ol { padding-left: 1.5em; display: flex; flex-direction: column; gap: var(--space-1); }
-.explainer-body ol li { color: var(--color-text-secondary); list-style: decimal; }
-.explainer-body .sources li { color: var(--color-text-muted); font-size: var(--text-xs); }
+.explainer-body .sources li {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
 
 .explainer-loading {
   display: inline-flex;
@@ -752,6 +859,72 @@
 
 @keyframes toast-in  { from { opacity: 0; transform: translateY(-12px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes toast-out { from { opacity: 1; }                                            to { opacity: 0; transform: translateY(-12px); } }
+
+/* ─── Skeleton states ─────────────────────────────────────────────────────── */
+
+.skeleton-block {
+  display: inline-block;
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.skeleton-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-bg-row-hover) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.chart-skeleton-body {
+  height: 160px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.skeleton-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+}
+
+.skeleton-bar {
+  flex: 1;
+  background: var(--color-bg-subtle);
+  border-radius: 1px;
+  min-height: 8px;
+}
+
+.skeleton-row-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.skeleton-avatar {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+  flex-shrink: 0;
+}
 
 /* ─── Empty state ─────────────────────────────────────────────────────────── */
 
@@ -1394,6 +1567,27 @@
 .logs-table .row-action {
   width: 24px;
   height: 24px;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: background var(--motion-fast) var(--ease-out),
+              color var(--motion-fast) var(--ease-out),
+              border-color var(--motion-fast) var(--ease-out);
+}
+.logs-table tr:hover .row-action {
+  background: var(--color-bg-canvas);
+  border-color: var(--color-border-default);
+  color: var(--color-text-primary);
+}
+.logs-table .row-action:hover,
+.logs-table .row-action[data-state='open'] {
+  background: var(--color-bg-elevated);
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
 }
 
 .logs-table .row-chevron {

@@ -15,6 +15,7 @@ import { MethodBadge } from '~/components/MethodBadge';
 import { SourceIcon } from '~/components/SourceIcon';
 import { StatusPill } from '~/components/StatusPill';
 import { Drawer } from '~/components/primitives/Drawer';
+import { Tooltip } from '~/components/primitives/Tooltip';
 import type { Log, UnderlyingRequest } from '~/data/types';
 import { formatDuration, formatPipeTimestamp } from '~/lib/time';
 
@@ -157,10 +158,14 @@ function UrlStrip({ url }: { url: string }) {
   return (
     <div className="url-strip">
       <span className="url-label">URL</span>
-      <code className="url-value">{url}</code>
-      <button type="button" className="icon" aria-label="Copy URL">
-        <Copy size={14} weight="regular" />
-      </button>
+      <Tooltip content={<code>{url}</code>} align="start">
+        <code className="url-value">{url}</code>
+      </Tooltip>
+      <Tooltip content="Copy URL">
+        <button type="button" className="icon" aria-label="Copy URL">
+          <Copy size={14} weight="regular" />
+        </button>
+      </Tooltip>
     </div>
   );
 }
@@ -183,16 +188,18 @@ function DetailsTab({ log, onToast }: { log: Log; onToast?: (msg: string) => voi
             {
               id: 'rheaders',
               title: 'Headers',
-              content: primary?.response.available && Object.keys(primary.response.headers).length > 0
-                ? <KeyValueList rows={primary.response.headers} />
-                : <p className="muted">Not available.</p>,
+              disabled: !primary?.response.available,
+              trailing: !primary?.response.available ? <NotAvailable log={log} /> : undefined,
+              content: <KeyValueList rows={primary?.response.headers ?? {}} />,
             },
             {
               id: 'rbody',
               title: 'Body',
-              content: primary?.response.available && primary.response.body
+              disabled: !primary?.response.body,
+              trailing: !primary?.response.body ? <NotAvailable log={log} /> : undefined,
+              content: primary?.response.body
                 ? <JsonViewer value={primary.response.body} />
-                : <p className="muted">Not available.</p>,
+                : null,
             },
           ]} />
         </Section>
@@ -260,23 +267,69 @@ function Section({ title, value, rightBadge, children }: SectionProps) {
   );
 }
 
-function SubAccordion({ items }: { items: Array<{ id: string; title: string; content: React.ReactNode }> }) {
+type SubItem = {
+  id: string;
+  title: string;
+  content: React.ReactNode;
+  /** Right-aligned summary shown on the row header (e.g. "Not available"). */
+  trailing?: React.ReactNode;
+  /** When true, the row is not expandable. */
+  disabled?: boolean;
+};
+
+function SubAccordion({ items }: { items: SubItem[] }) {
   return (
     <Accordion.Root type="multiple" className="sub-accordion">
       {items.map((it) => (
         <Accordion.Item value={it.id} key={it.id} className="accordion-item">
           <Accordion.Header asChild>
-            <Accordion.Trigger className="sub-toggle">
-              <CaretRight size={10} weight="bold" className="caret" />
-              <span>{it.title}</span>
-            </Accordion.Trigger>
+            <div className="sub-row">
+              <Accordion.Trigger className="sub-toggle" disabled={it.disabled}>
+                {!it.disabled ? (
+                  <CaretRight size={10} weight="bold" className="caret" />
+                ) : (
+                  <span className="caret caret-placeholder" aria-hidden="true" />
+                )}
+                <span>{it.title}</span>
+              </Accordion.Trigger>
+              {it.trailing ? <span className="sub-trailing">{it.trailing}</span> : null}
+            </div>
           </Accordion.Header>
-          <Accordion.Content className="accordion-content">
-            <div className="sub-body">{it.content}</div>
-          </Accordion.Content>
+          {!it.disabled ? (
+            <Accordion.Content className="accordion-content">
+              <div className="sub-body">{it.content}</div>
+            </Accordion.Content>
+          ) : null}
         </Accordion.Item>
       ))}
     </Accordion.Root>
+  );
+}
+
+/**
+ * "Not available" — explains via tooltip why the body/headers couldn't be
+ * captured. Reasoned from the log's expiry state, matching the Figma frames
+ * 11/12/13 which all show a tooltip-anchored explanation on these rows.
+ */
+function NotAvailable({ log }: { log: Log }) {
+  let reason: string;
+  if (log.expiryState === 'expired') {
+    reason =
+      'This log has expired. Log storage duration can be updated via the Advanced Logs tab on Project Settings.';
+  } else if (log.expiryState === 'not-available') {
+    reason =
+      'The provider did not return a response body. Common with 4xx errors before a request body is parsed.';
+  } else if (log.status >= 400) {
+    reason = `The provider returned ${log.status} before a response body was sent.`;
+  } else {
+    reason = 'No response body was captured for this log.';
+  }
+  return (
+    <Tooltip content={reason} side="left" align="end">
+      <span className="not-available" tabIndex={0}>
+        Not available
+      </span>
+    </Tooltip>
   );
 }
 
@@ -288,7 +341,9 @@ function KeyValueList({ rows }: { rows: Record<string, string> }) {
       {entries.map(([k, v]) => (
         <li key={k}>
           <span className="kv-key">{k}</span>
-          <span className="kv-value">{v}</span>
+          <Tooltip content={<code>{v}</code>} align="end" enabled={v.length > 40}>
+            <span className="kv-value">{v}</span>
+          </Tooltip>
         </li>
       ))}
     </ul>
@@ -387,54 +442,68 @@ function ErrorExplainer({ log, onToast }: { log: Log; onToast?: (msg: string) =>
         <span className="explainer-link">via <a href="#">Advanced Logs</a></span>
       </div>
       <div className="explainer-body">
-        <h4>Explainer</h4>
-        <p>
-          Based on the error information and documentation search results, I can provide the
-          following resolution steps:
-        </p>
-        <p>
-          The error is likely due to an invalid webhook endpoint configuration for{' '}
-          {log.provider.name} account creation events. Please try the following steps:
-        </p>
-        <ol>
-          <li>
-            Verify that the webhook URL{' '}
-            <a href="#" onClick={(e) => e.preventDefault()}>
-              https://typedwebhook.tools/webhook/e41181cd-8173-4f49-8c71-92edccb19889
-            </a>{' '}
-            is correctly configured and accessible.
-          </li>
-          <li>
-            Check that your {log.provider.name} integration has the necessary permissions to
-            create and manage webhook subscriptions.
-          </li>
-          <li>
-            Re-register the webhook endpoint in your StackOne integration settings for the{' '}
-            {log.provider.name} <code>account_created</code> event.
-          </li>
-        </ol>
-        <p>
-          The <code>{log.status}</code> error suggests that either the webhook endpoint is not
-          properly registered or the URL is no longer valid. Since there are no provider errors
-          in the response, this indicates the issue is likely with the webhook configuration
-          rather than the {log.provider.name} API itself.
-        </p>
-        <p>
-          If the issue persists after trying these steps, please contact StackOne support via
-          your dedicated Slack channel or at{' '}
-          <a href="mailto:support@stackone.com" onClick={(e) => e.preventDefault()}>
-            support@stackone.com
-          </a>{' '}
-          for further assistance.
-        </p>
-        <h4>Sources</h4>
-        <ol className="sources">
-          <li>[1] Example Source Title — example.com</li>
-          <li>[2] Example Source Title — example.com</li>
-          <li>[3] Example Source Title — example.com</li>
-          <li>[4] Example Source Title — example.com</li>
-          <li>[5] Example Source Title — example.com</li>
-        </ol>
+        <section className="explainer-section">
+          <h4>Explainer</h4>
+          <p>
+            Based on the error information and documentation search results, I can provide the
+            following analysis and resolution steps for the{' '}
+            <code>{log.method} {log.path}</code> request that returned{' '}
+            <code>{log.status}</code>.
+          </p>
+          <p>
+            The error is likely due to an invalid webhook endpoint configuration for{' '}
+            {log.provider.name} account creation events. Since there are no{' '}
+            <code>provider_errors</code> in the response, this indicates the issue is with the
+            webhook configuration rather than the {log.provider.name} API itself.
+          </p>
+        </section>
+
+        <section className="explainer-section">
+          <h4>Resolution Steps</h4>
+          <ol className="resolution-steps">
+            <li>
+              <p>
+                Verify that the webhook URL is correctly configured and accessible:{' '}
+                <a href="#" onClick={(e) => e.preventDefault()}>
+                  https://typedwebhook.tools/webhook/e41181cd-8173-4f49-8c71-92edccb19889
+                </a>
+              </p>
+            </li>
+            <li>
+              <p>
+                Check that your {log.provider.name} integration has the necessary permissions to
+                create and manage webhook subscriptions.
+              </p>
+            </li>
+            <li>
+              <p>
+                Re-register the webhook endpoint in your StackOne integration settings for the{' '}
+                {log.provider.name} <code>account_created</code> event.
+              </p>
+            </li>
+            <li>
+              <p>
+                If the issue persists, contact StackOne support via your dedicated Slack channel
+                or at{' '}
+                <a href="mailto:support@stackone.com" onClick={(e) => e.preventDefault()}>
+                  support@stackone.com
+                </a>
+                .
+              </p>
+            </li>
+          </ol>
+        </section>
+
+        <section className="explainer-section">
+          <h4>Sources</h4>
+          <ol className="sources">
+            <li>[1] Example Source Title — example.com</li>
+            <li>[2] Example Source Title — example.com</li>
+            <li>[3] Example Source Title — example.com</li>
+            <li>[4] Example Source Title — example.com</li>
+            <li>[5] Example Source Title — example.com</li>
+          </ol>
+        </section>
         {state === 'submitted' ? (
           <p className="muted" style={{ marginTop: 'var(--space-3)' }}>Thanks for the feedback.</p>
         ) : (

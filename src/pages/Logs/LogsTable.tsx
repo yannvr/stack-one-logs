@@ -28,6 +28,7 @@ import { MethodBadge } from '~/components/MethodBadge';
 import { RowActionsMenu } from '~/components/RowActionsMenu';
 import { SourceIcon } from '~/components/SourceIcon';
 import { StatusPill } from '~/components/StatusPill';
+import { Tooltip } from '~/components/primitives/Tooltip';
 import type { HttpMethod, Log, SourceType } from '~/data/types';
 import { timestampToBucketIndex } from '~/lib/buckets';
 import { formatDate, formatDuration, formatTimeWithMs } from '~/lib/time';
@@ -159,7 +160,9 @@ export function LogsTable({ logs, onRowClick, selectedLogId, onReplay, onBatchRe
             <span className="request-cell">
               <MethodBadge method={log.method} />
               <span className="endpoint">{log.endpoint}</span>
-              <span className="path">{log.path}</span>
+              <Tooltip content={<code>{log.path}</code>}>
+                <span className="path">{log.path}</span>
+              </Tooltip>
             </span>
           );
         },

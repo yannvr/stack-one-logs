@@ -14,9 +14,9 @@ import {
   UsersThree,
   type Icon as PhosphorIcon,
 } from '@phosphor-icons/react';
-import * as Tooltip from '@radix-ui/react-tooltip';
 import { NavLink } from 'react-router-dom';
 
+import { Tooltip } from '~/components/primitives/Tooltip';
 import { useSidebarStore } from '~/state/sidebarStore';
 
 type NavItem = {
@@ -66,13 +66,13 @@ export function Sidebar() {
   const toggle = useSidebarStore((s) => s.toggle);
 
   return (
-    <Tooltip.Provider delayDuration={300}>
-      <aside
-        className="sidebar"
-        aria-label="Primary navigation"
-        data-collapsed={isCollapsed || undefined}
-      >
-        <header className="sidebar-header">
+    <aside
+      className="sidebar"
+      aria-label="Primary navigation"
+      data-collapsed={isCollapsed || undefined}
+    >
+      <header className="sidebar-header">
+        <Tooltip content="Production [EU1]" side="right" enabled={isCollapsed}>
           <button type="button" className="env-switcher" aria-label="Switch environment">
             <span className="env-mark" aria-hidden="true">
               <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
@@ -84,7 +84,8 @@ export function Sidebar() {
             <span className="env-name">Production [EU1]</span>
             <CaretUpDown size={14} weight="regular" className="env-caret" />
           </button>
-        </header>
+        </Tooltip>
+      </header>
 
         <nav className="sidebar-nav">
           {[...SECTIONS, SUPPORT].map((section) => (
@@ -99,18 +100,20 @@ export function Sidebar() {
           ))}
         </nav>
 
-        <footer className="sidebar-footer">
+      <footer className="sidebar-footer">
+        <Tooltip content="Morgan Williams" side="right" enabled={isCollapsed}>
           <button type="button" className="account-button" aria-label="Account menu">
             <span className="account-avatar" aria-hidden="true">M</span>
             <span className="account-name">Morgan Williams</span>
             <Gear size={14} weight="regular" className="account-gear" />
           </button>
+        </Tooltip>
+        <Tooltip content={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} side="right">
           <button
             type="button"
             className="sidebar-toggle"
             onClick={toggle}
             aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {isCollapsed ? (
               <CaretDoubleRight size={14} weight="regular" />
@@ -118,9 +121,9 @@ export function Sidebar() {
               <CaretDoubleLeft size={14} weight="regular" />
             )}
           </button>
-        </footer>
-      </aside>
-    </Tooltip.Provider>
+        </Tooltip>
+      </footer>
+    </aside>
   );
 }
 
@@ -154,23 +157,18 @@ function SidebarItem({ item, collapsed }: { item: NavItem; collapsed: boolean })
     </NavLink>
   );
 
-  if (!collapsed) {
-    return <li>{inner}</li>;
-  }
+  const tooltipContent = (
+    <>
+      {label}
+      {stub ? <span className="tooltip-meta"> · stub</span> : null}
+    </>
+  );
 
-  // Collapsed: wrap in tooltip so the label is still accessible.
   return (
     <li>
-      <Tooltip.Root>
-        <Tooltip.Trigger asChild>{inner}</Tooltip.Trigger>
-        <Tooltip.Portal>
-          <Tooltip.Content className="tooltip-content" side="right" sideOffset={8}>
-            {label}
-            {stub ? <span className="tooltip-meta"> · stub</span> : null}
-            <Tooltip.Arrow className="tooltip-arrow" width={10} height={5} />
-          </Tooltip.Content>
-        </Tooltip.Portal>
-      </Tooltip.Root>
+      <Tooltip content={tooltipContent} side="right" enabled={collapsed || stub}>
+        {inner}
+      </Tooltip>
     </li>
   );
 }

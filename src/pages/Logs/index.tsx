@@ -13,6 +13,7 @@ import { LogsChart } from './LogsChart';
 import { LogsDetail } from './LogsDetail';
 import { LogsEmpty } from './LogsEmpty';
 import { LogsFilters, type FiltersValue } from './LogsFilters';
+import { ChartSkeleton, TableSkeleton } from './LogsLoading';
 import { LogsTable } from './LogsTable';
 
 const INITIAL_FILTERS: FiltersValue = {
@@ -131,19 +132,11 @@ export function LogsPage() {
             <LogsFilters value={filters} onChange={setFilters} onRefresh={refetch} />
           )}
           {!isEmptyDemo && (summaryLoading || !summary ? (
-            <section className="chart-card" style={{ minHeight: 240 }}>
-              <p style={{ color: 'var(--color-text-muted)' }}>Loading chart…</p>
-            </section>
+            <ChartSkeleton />
           ) : (
             <LogsChart summary={summary} onBucketClick={onBucketClick} />
           ))}
-          {logsLoading ? (
-            <section className="logs-table-card" style={{ padding: 'var(--space-4)' }}>
-              <p style={{ color: 'var(--color-text-muted)' }}>Loading logs…</p>
-            </section>
-          ) : (
-            detailContent
-          )}
+          {logsLoading ? <TableSkeleton /> : detailContent}
         </div>
       </div>
 
