@@ -7,7 +7,15 @@
 import { generateChartSummary, generateLogs } from './mock';
 import type { ChartSummary, Log } from './types';
 
-const LATENCY_MS = { min: 220, max: 480 };
+/**
+ * Mock latency. Long enough that the skeleton states are visible during a
+ * demo (you can see the chart and table loading); short enough to not feel
+ * sluggish on real interactions like Refresh or bucket-click.
+ *
+ * For comparison: the Explainer's "generating" step takes 1500ms. We're a bit
+ * faster than that because a list fetch should feel snappier than an LLM call.
+ */
+const LATENCY_MS = { min: 800, max: 1200 };
 
 const RAW_LOGS: Log[] = generateLogs(200);
 const RAW_SUMMARY: ChartSummary = generateChartSummary(90);

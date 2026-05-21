@@ -233,9 +233,30 @@ function generateLog(referenceDate: Date, bucketWindowMs = 12 * 60 * 1000): Log 
 }
 
 export function generateLogs(count = 200, referenceDate = new Date()): Log[] {
-  return Array.from({ length: count }, () => generateLog(referenceDate)).sort(
-    (a, b) => Date.parse(b.requestedAt) - Date.parse(a.requestedAt),
-  );
+  // Build the dataset in two passes so the chart<->table click-sync never yields
+  // an empty result for a bar that visibly has volume:
+  //   1) One log per visible chart bucket, anchored at a random offset inside
+  //      that bucket. Guarantees coverage.
+  //   2) Remaining logs distributed randomly inside (and 15% outside) the
+  //      chart window, same as before.
+  const logs: Log[] = [];
+
+  // Pass 1 — one per bucket.
+  for (let i = 0; i < CHART_BUCKET_COUNT; i++) {
+    const bucketEnd = referenceDate.getTime() - i * CHART_BUCKET_MS;
+    const offsetInside = faker.number.int({ min: 0, max: CHART_BUCKET_MS - 1 });
+    const log = generateLog(referenceDate, CHART_WINDOW_MS);
+    log.requestedAt = new Date(bucketEnd - offsetInside).toISOString();
+    logs.push(log);
+  }
+
+  // Pass 2 — fill the remainder with the existing distribution.
+  const remaining = Math.max(0, count - logs.length);
+  for (let i = 0; i < remaining; i++) {
+    logs.push(generateLog(referenceDate));
+  }
+
+  return logs.sort((a, b) => Date.parse(b.requestedAt) - Date.parse(a.requestedAt));
 }
 
 /**
