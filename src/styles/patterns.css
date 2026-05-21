@@ -31,21 +31,25 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 4px;
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
-  padding: 1px 8px;
-  min-width: 42px;
+  padding: 1px 8px 1px 6px;
+  min-width: 52px;
   height: 20px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--pill-color, var(--color-border-default));
   background: var(--pill-soft, transparent);
   color: var(--pill-color, var(--color-text-secondary));
+  cursor: help;
 }
+.status-pill svg { flex-shrink: 0; }
+
 .status-pill[data-severity='success']      { --pill-color: var(--color-status-success); --pill-soft: var(--color-status-success-soft); }
 .status-pill[data-severity='redirect']     { --pill-color: var(--color-status-info);    --pill-soft: var(--color-status-info-soft); }
-.status-pill[data-severity='client-error'] { --pill-color: var(--color-status-error);   --pill-soft: var(--color-status-error-soft); }
-.status-pill[data-severity='server-error'] { --pill-color: var(--color-status-error);   --pill-soft: color-mix(in srgb, var(--color-status-error) 22%, transparent); }
+.status-pill[data-severity='client-error'] { --pill-color: var(--color-status-warning); --pill-soft: var(--color-status-warning-soft); }
+.status-pill[data-severity='server-error'] { --pill-color: var(--color-status-error);   --pill-soft: var(--color-status-error-soft); }
 
 /* ─── Avatar ──────────────────────────────────────────────────────────────── */
 
