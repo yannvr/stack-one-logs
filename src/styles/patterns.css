@@ -1086,9 +1086,43 @@
   height: 36px;
 }
 
+.date-range {
+  display: inline-flex;
+  align-items: stretch;
+  position: relative;
+}
+
 .date-range-trigger {
   height: 36px;
   white-space: nowrap;
+}
+
+.date-range[data-active] .date-range-trigger {
+  padding-right: var(--space-8);
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-hover);
+}
+.date-range[data-active] .date-range-trigger svg {
+  color: var(--color-accent-hover);
+}
+
+.date-range-clear {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  color: var(--color-accent-hover);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--motion-fast) var(--ease-out);
+}
+.date-range-clear:hover {
+  background: color-mix(in srgb, var(--color-accent) 22%, transparent);
 }
 
 /* ─── Radix Switch ────────────────────────────────────────────────────────── */
@@ -1192,7 +1226,7 @@
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
-  padding: var(--space-5) var(--space-6) var(--space-3);
+  padding: var(--space-5) var(--space-6) var(--space-4);
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
@@ -1207,10 +1241,23 @@
 
 .chart-header {
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: end;
+  grid-template-columns: auto 1px auto;
+  align-items: stretch;
   gap: var(--space-6);
   margin-bottom: var(--space-4);
+  justify-content: space-between;
+}
+
+/* Vertical divider between hero and right stats. */
+.chart-header::after {
+  content: '';
+  width: 0; /* placeholder; the actual divider is in .chart-divider */
+}
+.chart-divider {
+  width: 1px;
+  background: var(--color-border-default);
+  align-self: stretch;
+  margin: 4px 0;
 }
 
 /* Hero: editorial lede on the left. */
@@ -1218,12 +1265,13 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+  justify-content: flex-end;
 }
 
 .chart-eyebrow {
   text-transform: uppercase;
-  letter-spacing: 0.18em;
-  font-size: var(--text-xs);
+  letter-spacing: 0.16em;
+  font-size: 10px;
   font-weight: var(--weight-medium);
   color: var(--color-text-muted);
 }
@@ -1234,12 +1282,12 @@
 
 .chart-hero-value {
   font-weight: var(--weight-semibold);
-  font-size: var(--text-display);
+  font-size: 44px;
   line-height: 1;
   letter-spacing: -0.025em;
   font-variant-numeric: tabular-nums;
   color: var(--color-text-primary);
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .chart-hero-delta {
@@ -1248,54 +1296,61 @@
   gap: var(--space-2);
   font-size: var(--text-xs);
   color: var(--color-text-muted);
+  margin-top: 2px;
 }
 .chart-hero-delta-label {
   font-style: italic;
+  color: var(--color-text-muted);
 }
 
-/* Secondary stats on the right. */
+/* Secondary stats on the right — vertical stack to feel like a legend index. */
 .chart-stats {
   display: flex;
-  align-items: end;
-  gap: var(--space-6);
+  flex-direction: column;
+  gap: var(--space-2);
+  justify-content: center;
+  min-width: 180px;
 }
 
 .stat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  text-align: right;
-  align-items: flex-end;
-}
-
-.stat-label {
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: var(--text-xs);
-  font-weight: var(--weight-medium);
-  color: var(--color-text-muted);
-  display: inline-flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 16px 1fr auto;
   gap: var(--space-2);
-  justify-content: flex-end;
+  align-items: center;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: background var(--motion-fast) var(--ease-out);
 }
-.stat-label::before {
+.stat:hover { background: var(--color-bg-row-hover); }
+
+/* Marker is a small bar (matches the actual chart bars) rather than a dot. */
+.stat::before {
   content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: var(--radius-full);
+  width: 3px;
+  height: 14px;
+  border-radius: 1.5px;
   background: var(--color-text-muted);
 }
-.stat[data-dot='success'] .stat-label::before { background: var(--color-status-success); }
-.stat[data-dot='error']   .stat-label::before { background: var(--color-status-error); }
+.stat[data-dot='success']::before { background: var(--color-status-success); }
+.stat[data-dot='error']::before   { background: var(--color-status-error); }
+
+.stat-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-secondary);
+  text-transform: none;
+  letter-spacing: 0;
+  text-align: left;
+}
 
 .stat-value {
-  font-size: var(--text-xl);
+  font-size: var(--text-base);
   font-weight: var(--weight-semibold);
   line-height: 1;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.005em;
   font-variant-numeric: tabular-nums;
   color: var(--color-text-primary);
+  text-align: right;
 }
 
 .stat-delta {
@@ -1303,6 +1358,8 @@
   font-size: var(--text-xs);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
+  grid-column: 3 / 4;
+  justify-self: end;
 }
 .stat-delta[data-sign='up']   { color: var(--color-status-success); }
 .stat-delta[data-sign='down'] { color: var(--color-status-error); }
@@ -1313,6 +1370,14 @@
   width: 100%;
 }
 
+.chart-grid-line {
+  stroke: var(--color-border-default);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+  opacity: 0.7;
+  vector-effect: non-scaling-stroke;
+}
+
 .chart-bar {
   transform-origin: bottom;
   animation: bar-rise 700ms var(--ease-out) both;
@@ -1320,11 +1385,11 @@
   cursor: pointer;
 }
 .chart-bar[data-dimmed] {
-  opacity: 0.35;
+  opacity: 0.32;
 }
 .chart-bar[data-highlighted] {
   opacity: 1;
-  filter: brightness(1.08);
+  filter: brightness(1.06);
 }
 
 @keyframes bar-rise {

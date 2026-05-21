@@ -37,6 +37,7 @@ export function LogsChart({ summary, onBucketClick }: Props) {
             <span className="chart-hero-delta-label">vs prior period</span>
           </span>
         </div>
+        <div className="chart-divider" aria-hidden="true" />
         <div className="chart-stats">
           <Stat
             label="Success"
@@ -154,19 +155,36 @@ function ChartBody({
         aria-label="Stacked bar chart of API request volume by time bucket"
       >
         <Group left={MARGIN.left} top={MARGIN.top}>
+          {/* Subtle horizontal grid at each Y tick — anchors the eye to scale. */}
+          {yScale.ticks(3).map((tick) => {
+            const y = yScale(tick);
+            if (tick === 0) return null;
+            return (
+              <line
+                key={tick}
+                className="chart-grid-line"
+                x1={0}
+                x2={innerWidth}
+                y1={y}
+                y2={y}
+              />
+            );
+          })}
           <AxisLeft
             scale={yScale}
             numTicks={3}
             tickFormat={(v) => {
               const n = v as number;
-              if (n === 0) return '0k';
+              if (n === 0) return '0';
               return `${Math.round(n / 1000)}k`;
             }}
             tickLabelProps={() => ({
               fill: 'var(--color-chart-axis)',
               fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: '0.02em',
               textAnchor: 'end',
-              dx: -6,
+              dx: -8,
               dy: 4,
             })}
             stroke="transparent"
@@ -232,8 +250,10 @@ function ChartBody({
             tickLabelProps={() => ({
               fill: 'var(--color-chart-axis)',
               fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: '0.04em',
               textAnchor: 'middle',
-              dy: 4,
+              dy: 8,
             })}
             stroke="transparent"
             tickStroke="transparent"
