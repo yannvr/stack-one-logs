@@ -105,9 +105,15 @@ function generateProvider(): Provider {
   return { id: `prv_${name.toLowerCase()}`, name, vertical };
 }
 
+// One stable account record per name — keeps avatar colors and filter
+// options consistent across the dataset.
+const ACCOUNTS: Account[] = ACCOUNT_NAMES.map((name) => ({
+  id: `acc_${name.toLowerCase().replace(/[^a-z0-9]+/g, '_').slice(0, 16)}`,
+  name,
+}));
+
 function generateAccount(): Account {
-  const name = faker.helpers.arrayElement(ACCOUNT_NAMES);
-  return { id: `acc_${faker.string.alphanumeric(8)}`, name };
+  return faker.helpers.arrayElement(ACCOUNTS);
 }
 
 function generateSource(): Source {

@@ -90,12 +90,14 @@ export function LogsTable({ logs, onRowClick, selectedLogId, onReplay, onBatchRe
     setPagination((p) => ({ ...p, pageIndex: 0 }));
   }, [logs, columnFilters]);
 
-  // Derive Account filter options from the current dataset.
+  // Derive Account filter options from the current dataset. Dedup by *name*,
+  // not id — Faker generates many ids per account name, and a filter labelled
+  // "Sample Organization" appearing 6 times is useless noise.
   const accountOptions: FilterOption[] = useMemo(() => {
-    const seen = new Map<string, string>();
-    for (const log of logs) seen.set(log.account.id, log.account.name);
-    return Array.from(seen.entries())
-      .map(([id, name]) => ({ value: id, label: name }))
+    const names = new Set<string>();
+    for (const log of logs) names.add(log.account.name);
+    return Array.from(names)
+      .map((name) => ({ value: name, label: name }))
       .sort((a, b) => a.label.localeCompare(b.label));
   }, [logs]);
 
@@ -123,7 +125,7 @@ export function LogsTable({ logs, onRowClick, selectedLogId, onReplay, onBatchRe
         sortingFn: (a, b) =>
           Date.parse(a.original.requestedAt) - Date.parse(b.original.requestedAt),
       }),
-      columnHelper.accessor((row) => row.account.id, {
+      columnHelper.accessor((row) => row.account.name, {
         id: 'account',
         header: 'Account',
         cell: (ctx) => {
@@ -135,7 +137,7 @@ export function LogsTable({ logs, onRowClick, selectedLogId, onReplay, onBatchRe
             </span>
           );
         },
-        filterFn: (row, _id, value: string[]) => value.includes(row.original.account.id),
+        filterFn: (row, _id, value: string[]) => value.includes(row.original.account.name),
       }),
       columnHelper.accessor((row) => row.source.type, {
         id: 'source',

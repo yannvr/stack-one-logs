@@ -674,11 +674,16 @@
   margin-top: var(--space-2);
 }
 
+/* Generated header — soft accent-tinted background to signal AI content. */
 .explainer-row.open {
   margin-top: 0;
   border: none;
   border-bottom: 1px solid var(--color-border-default);
   border-radius: 0;
+  background: var(--color-status-info-soft);
+}
+.explainer-row.open .explainer-label {
+  color: var(--color-status-info);
 }
 
 .explainer-body {
@@ -687,27 +692,14 @@
   color: var(--color-text-primary);
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-3);
 }
 
-.explainer-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-.explainer-section h4 {
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--color-text-muted);
-}
-.explainer-section p {
-  color: var(--color-text-secondary);
+.explainer-summary {
+  color: var(--color-text-primary);
   line-height: 1.55;
 }
-.explainer-section p code,
-.explainer-section li code {
+.explainer-summary code {
   background: var(--color-bg-subtle);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-sm);
@@ -716,51 +708,80 @@
   color: var(--color-text-primary);
 }
 
+.explainer-h {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+  margin-top: var(--space-2);
+}
+
 .resolution-steps {
   padding-left: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  counter-reset: step;
   list-style: none;
 }
-.resolution-steps > li {
-  counter-increment: step;
+
+.resolution-step {
   display: grid;
-  grid-template-columns: 22px 1fr;
-  gap: var(--space-2);
+  grid-template-columns: 22px 1fr auto;
+  gap: var(--space-3);
   align-items: start;
+  padding: var(--space-3) var(--space-3);
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  transition: background var(--motion-fast) var(--ease-out),
+              border-color var(--motion-fast) var(--ease-out);
 }
-.resolution-steps > li::before {
-  content: counter(step);
+
+/* Primary/next-action step gets the accent green highlight + dark text */
+.resolution-step[data-primary] {
+  background: color-mix(in srgb, var(--color-accent) 12%, var(--color-bg-canvas));
+  border-color: color-mix(in srgb, var(--color-accent) 20%, transparent);
+}
+
+.resolution-step-num {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
-  background: var(--color-accent-soft);
+  color: var(--color-text-muted);
+  margin-top: 1px;
+}
+.resolution-step[data-primary] .resolution-step-num {
   color: var(--color-accent-hover);
-  width: 18px;
-  height: 18px;
-  border-radius: var(--radius-full);
+}
+
+.resolution-step-text {
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+
+/* Checkbox-style toggle on the right of each step */
+.resolution-step-check {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-border-strong);
+  background: var(--color-bg-canvas);
+  color: transparent;
+  cursor: pointer;
+  margin-top: 1px;
+  transition: background var(--motion-fast) var(--ease-out),
+              border-color var(--motion-fast) var(--ease-out),
+              color var(--motion-fast) var(--ease-out);
 }
-.resolution-steps > li p {
-  margin: 0;
-  color: var(--color-text-secondary);
+.resolution-step-check:hover {
+  border-color: var(--color-text-muted);
 }
-
-.explainer-body .sources {
-  list-style: none;
-  padding-left: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-}
-.explainer-body .sources li {
-  color: var(--color-text-muted);
-  font-size: var(--text-xs);
+.resolution-step[data-checked] .resolution-step-check {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--white);
 }
 
 .explainer-loading {
@@ -786,24 +807,28 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding-top: var(--space-3);
-  border-top: 1px dashed var(--color-border-default);
+  margin-top: var(--space-3);
 }
 
 .feedback-prompt {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-3);
-  font-weight: var(--weight-medium);
-  color: var(--color-text-primary);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
 }
 
 .feedback textarea {
   width: 100%;
   font-family: inherit;
+  font-size: var(--text-sm);
   resize: vertical;
-  min-height: 60px;
+  min-height: 72px;
+  background: var(--color-bg-canvas);
+}
+.feedback textarea:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .feedback-actions {
@@ -813,12 +838,36 @@
   align-self: flex-end;
 }
 
+.feedback-submitted {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  color: var(--color-status-success);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+.feedback-submitted svg { color: var(--color-status-success); }
+
 .star-rating {
   display: inline-flex;
   align-items: center;
   gap: 2px;
 }
-.star-rating button { width: 24px; height: 24px; }
+.star-rating button { width: 22px; height: 22px; }
+
+/* Button spinner — small inline loader for the Submit state */
+.button-spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: var(--white);
+  border-radius: var(--radius-full);
+  animation: spin 700ms linear infinite;
+  margin-left: var(--space-1);
+  vertical-align: middle;
+}
 
 /* ─── Toast (Radix Toast) ─────────────────────────────────────────────────── */
 

@@ -157,6 +157,9 @@ function SidebarItem({ item, collapsed }: { item: NavItem; collapsed: boolean })
     </NavLink>
   );
 
+  // Tooltips are only useful when the sidebar is collapsed (label is hidden).
+  // When expanded, the label is right there next to the icon — adding a
+  // tooltip duplicates information and shows up redundantly on active items.
   const tooltipContent = (
     <>
       {label}
@@ -166,7 +169,7 @@ function SidebarItem({ item, collapsed }: { item: NavItem; collapsed: boolean })
 
   return (
     <li>
-      <Tooltip content={tooltipContent} side="right" enabled={collapsed || stub}>
+      <Tooltip content={tooltipContent} side="right" enabled={collapsed}>
         {inner}
       </Tooltip>
     </li>

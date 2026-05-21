@@ -3,6 +3,8 @@ import * as Tabs from '@radix-ui/react-tabs';
 import {
   ArrowSquareOut,
   CaretRight,
+  Check,
+  CheckCircle,
   Copy,
   Sparkle,
   Star,
@@ -351,17 +353,48 @@ function KeyValueList({ rows }: { rows: Record<string, string> }) {
 }
 
 type ExplainerState =
-  | 'gated'
-  | 'collapsed'
-  | 'generating'
-  | 'generated'
-  | 'feedback-open'
-  | 'submitted';
+  | 'gated'        // Feature flag off
+  | 'collapsed'    // "Open to Generate"
+  | 'generating'   // Spinner while we "compute" the explanation
+  | 'generated'    // Body + steps + rating visible
+  | 'submitting'   // Submit clicked, spinner on the button
+  | 'submitted';   // Inline confirmation replaces rating/textarea
+
+type ResolutionStep = {
+  id: string;
+  text: string;
+  /** Step rendered as the "next action" — green tint + pre-checked. */
+  primary?: boolean;
+};
+
+// Figma copy for the demo. In production these come from the model output.
+const RESOLUTION_STEPS: ResolutionStep[] = [
+  {
+    id: 'step-1',
+    text:
+      'Check your client ID and client secret — the 403 error and "Wrong credentials" message indicate invalid authentication credentials.',
+    primary: true,
+  },
+  {
+    id: 'step-2',
+    text:
+      'Verify that your API credentials are correctly entered in capital letters in the COMPANY NAME field.',
+  },
+  {
+    id: 'step-3',
+    text:
+      'Ensure your API credentials have the required permissions selected during generation (e.g. Employees, Attendances).',
+  },
+];
 
 function ErrorExplainer({ log, onToast }: { log: Log; onToast?: (msg: string) => void }) {
   const [state, setState] = useState<ExplainerState>(log.hasAiExplainer ? 'collapsed' : 'gated');
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
+  // Step 1 starts checked (the "completed" highlight from the Figma).
+  const [checked, setChecked] = useState<Set<string>>(
+    () => new Set(RESOLUTION_STEPS.filter((s) => s.primary).map((s) => s.id)),
+  );
 
   // Simulate generation latency on click.
   useEffect(() => {
@@ -370,9 +403,23 @@ function ErrorExplainer({ log, onToast }: { log: Log; onToast?: (msg: string) =>
     return () => clearTimeout(t);
   }, [state]);
 
-  function submitFeedback() {
-    onToast?.('Feedback Submitted');
-    setState('submitted');
+  // Simulate submit latency.
+  useEffect(() => {
+    if (state !== 'submitting') return;
+    const t = setTimeout(() => {
+      setState('submitted');
+      onToast?.('Feedback Submitted');
+    }, 700);
+    return () => clearTimeout(t);
+  }, [state, onToast]);
+
+  function toggleStep(id: string) {
+    setChecked((cur) => {
+      const next = new Set(cur);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   }
 
   if (state === 'gated') {
@@ -411,101 +458,81 @@ function ErrorExplainer({ log, onToast }: { log: Log; onToast?: (msg: string) =>
 
   if (state === 'generating') {
     return (
-      <div className="explainer-expanded">
+      <div className="explainer-expanded" data-state="generating">
         <div className="explainer-row open">
           <span className="explainer-label">
             <Sparkle size={12} weight="regular" />
             Error Explainer
           </span>
-          <span className="explainer-meta">◇ Generating…</span>
+          <span className="explainer-meta">Generating…</span>
           <span className="explainer-link">
-            via <a href="#">Advanced Logs</a>
+            via <a href="#" onClick={(e) => e.preventDefault()}>Advanced Logs</a>
           </span>
         </div>
         <div className="explainer-loading">
           <span className="spinner" aria-hidden="true" />
-          Generating Explainer &amp; Resolution Steps
-          <a href="#" className="explainer-link">via Advanced Logs</a>
+          <span>Generating Explainer &amp; Resolution Steps</span>
         </div>
       </div>
     );
   }
 
+  // generated / submitting / submitted all share the same body structure.
+  const ratingVisible = rating > 0 && state !== 'submitted';
   return (
-    <div className="explainer-expanded">
+    <div className="explainer-expanded" data-state="generated">
       <div className="explainer-row open">
         <span className="explainer-label">
           <Sparkle size={12} weight="regular" />
           Error Explainer
         </span>
-        <span className="explainer-meta">◇ Generated</span>
-        <span className="explainer-link">via <a href="#">Advanced Logs</a></span>
+        <span className="explainer-meta">Generated</span>
+        <span className="explainer-link">
+          via <a href="#" onClick={(e) => e.preventDefault()}>Advanced Logs</a>
+        </span>
       </div>
       <div className="explainer-body">
-        <section className="explainer-section">
-          <h4>Explainer</h4>
-          <p>
-            Based on the error information and documentation search results, I can provide the
-            following analysis and resolution steps for the{' '}
-            <code>{log.method} {log.path}</code> request that returned{' '}
-            <code>{log.status}</code>.
-          </p>
-          <p>
-            The error is likely due to an invalid webhook endpoint configuration for{' '}
-            {log.provider.name} account creation events. Since there are no{' '}
-            <code>provider_errors</code> in the response, this indicates the issue is with the
-            webhook configuration rather than the {log.provider.name} API itself.
-          </p>
-        </section>
+        <p className="explainer-summary">
+          The error is specifically a <code>{log.status}</code>{' '}
+          {log.status === 403 ? 'Forbidden' : log.status === 401 ? 'Unauthorized' : 'error'}{' '}
+          with “Wrong credentials” message from {log.provider.name}’s authentication endpoint,
+          which typically means either invalid or expired credentials. Following the resolution
+          steps below should resolve the connection issue.
+        </p>
 
-        <section className="explainer-section">
-          <h4>Resolution Steps</h4>
-          <ol className="resolution-steps">
-            <li>
-              <p>
-                Verify that the webhook URL is correctly configured and accessible:{' '}
-                <a href="#" onClick={(e) => e.preventDefault()}>
-                  https://typedwebhook.tools/webhook/e41181cd-8173-4f49-8c71-92edccb19889
-                </a>
-              </p>
-            </li>
-            <li>
-              <p>
-                Check that your {log.provider.name} integration has the necessary permissions to
-                create and manage webhook subscriptions.
-              </p>
-            </li>
-            <li>
-              <p>
-                Re-register the webhook endpoint in your StackOne integration settings for the{' '}
-                {log.provider.name} <code>account_created</code> event.
-              </p>
-            </li>
-            <li>
-              <p>
-                If the issue persists, contact StackOne support via your dedicated Slack channel
-                or at{' '}
-                <a href="mailto:support@stackone.com" onClick={(e) => e.preventDefault()}>
-                  support@stackone.com
-                </a>
-                .
-              </p>
-            </li>
-          </ol>
-        </section>
+        <h4 className="explainer-h">Resolution Steps:</h4>
+        <ol className="resolution-steps">
+          {RESOLUTION_STEPS.map((step, i) => {
+            const isChecked = checked.has(step.id);
+            return (
+              <li
+                key={step.id}
+                className="resolution-step"
+                data-primary={step.primary || undefined}
+                data-checked={isChecked || undefined}
+              >
+                <span className="resolution-step-num">{i + 1}</span>
+                <span className="resolution-step-text">{step.text}</span>
+                <button
+                  type="button"
+                  className="resolution-step-check"
+                  role="checkbox"
+                  aria-checked={isChecked}
+                  aria-label={`Mark step ${i + 1} ${isChecked ? 'incomplete' : 'complete'}`}
+                  onClick={() => toggleStep(step.id)}
+                >
+                  {isChecked ? <Check size={11} weight="bold" /> : null}
+                </button>
+              </li>
+            );
+          })}
+        </ol>
 
-        <section className="explainer-section">
-          <h4>Sources</h4>
-          <ol className="sources">
-            <li>[1] Example Source Title — example.com</li>
-            <li>[2] Example Source Title — example.com</li>
-            <li>[3] Example Source Title — example.com</li>
-            <li>[4] Example Source Title — example.com</li>
-            <li>[5] Example Source Title — example.com</li>
-          </ol>
-        </section>
         {state === 'submitted' ? (
-          <p className="muted" style={{ marginTop: 'var(--space-3)' }}>Thanks for the feedback.</p>
+          <p className="feedback-submitted">
+            <CheckCircle size={14} weight="fill" />
+            Feedback Submitted
+          </p>
         ) : (
           <div className="feedback">
             <div className="feedback-prompt">
@@ -513,28 +540,36 @@ function ErrorExplainer({ log, onToast }: { log: Log; onToast?: (msg: string) =>
               <StarRating
                 value={rating}
                 onChange={(n) => {
+                  const wasZero = rating === 0;
                   setRating(n);
-                  if (state === 'generated') {
-                    setState('feedback-open');
-                    onToast?.('Rating Provided');
-                  }
+                  if (wasZero) onToast?.('Rating Provided');
                 }}
               />
             </div>
-            {state === 'feedback-open' ? (
+            {ratingVisible ? (
               <>
                 <textarea
-                  placeholder="What worked, what didn't? (Optional)"
+                  placeholder="Please provide any additional context or feedback to help us improve the Error Explainer feature…"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   rows={3}
+                  disabled={state === 'submitting'}
                 />
                 <div className="feedback-actions">
-                  <button type="button" className="ghost" onClick={() => setState('generated')}>
-                    Cancel
-                  </button>
-                  <button type="button" className="primary" onClick={submitFeedback}>
-                    Submit
+                  <button
+                    type="button"
+                    className="primary"
+                    data-loading={state === 'submitting' || undefined}
+                    disabled={state === 'submitting'}
+                    onClick={() => setState('submitting')}
+                  >
+                    {state === 'submitting' ? (
+                      <>
+                        Submit <span className="button-spinner" aria-hidden="true" />
+                      </>
+                    ) : (
+                      'Submit'
+                    )}
                   </button>
                 </div>
               </>
