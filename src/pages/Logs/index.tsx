@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
+import { CommandPalette } from '~/components/CommandPalette';
 import { Sidebar } from '~/components/Sidebar';
 import { Toaster, useToasterState } from '~/components/Toaster';
 import { TopBar } from '~/components/TopBar';
@@ -7,6 +8,7 @@ import { batchReplay, getChartSummary, listLogs, replayLog } from '~/data/servic
 import { useQuery } from '~/data/useQuery';
 import type { ChartBucket, Log } from '~/data/types';
 import { CHART_BUCKET_MS } from '~/data/mock';
+import { useKeyboardShortcut } from '~/lib/keyboard';
 import { useSidebarStore } from '~/state/sidebarStore';
 import { useUrlState } from '~/state/urlState';
 import { LogsChart } from './LogsChart';
@@ -158,6 +160,63 @@ export function LogsPage() {
     [query, range.from, range.to, setQuery, setRange],
   );
 
+  // ── Keyboard shortcuts ────────────────────────────────────────────────────
+  // `/` focuses the search input. Skips when the user is already typing.
+  useKeyboardShortcut({ key: '/' }, (e) => {
+    e.preventDefault();
+    const input = document.querySelector<HTMLInputElement>('.logs-filters .search input');
+    input?.focus();
+  });
+  // `r` refreshes both chart and table.
+  useKeyboardShortcut({ key: 'r' }, (e) => {
+    e.preventDefault();
+    refetch();
+    toaster.show('Refreshed');
+  });
+  // `j` / `k` move the selection down / up between rows. If no row is open,
+  // open the first visible one.
+  useKeyboardShortcut({ key: 'j' }, (e) => {
+    e.preventDefault();
+    if (!selectedLogId) {
+      if (logs[0]) setSelectedLogId(logs[0].id);
+    } else {
+      onNavigate(1);
+    }
+  });
+  useKeyboardShortcut({ key: 'k' }, (e) => {
+    e.preventDefault();
+    if (!selectedLogId) {
+      if (logs[0]) setSelectedLogId(logs[0].id);
+    } else {
+      onNavigate(-1);
+    }
+  });
+
+  const clearAllFilters = useCallback(() => {
+    setQuery('');
+    setRange(undefined, undefined);
+    setColumnFilter('status', []);
+    setColumnFilter('method', []);
+    setColumnFilter('account', []);
+    setColumnFilter('source', []);
+  }, [setQuery, setRange, setColumnFilter]);
+
+  const showOnlyErrors = useCallback(() => {
+    setColumnFilter('status', ['client-error', 'server-error']);
+  }, [setColumnFilter]);
+
+  const showOnlySuccess = useCallback(() => {
+    setColumnFilter('status', ['success']);
+  }, [setColumnFilter]);
+
+  const clearTimeRange = useCallback(() => {
+    setRange(undefined, undefined);
+  }, [setRange]);
+
+  const scrollToTable = useCallback(() => {
+    document.querySelector('.logs-table-card')?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
   const detailContent = useMemo(() => {
     if (!hasLogs) {
       if (isEmptyDemo || (!query && !range.from && !range.to)) {
@@ -224,6 +283,15 @@ export function LogsPage() {
       />
 
       <Toaster items={toasts} onDismiss={dismiss} />
+
+      <CommandPalette
+        onRefresh={refetch}
+        onClearFilters={clearAllFilters}
+        onShowOnlyErrors={showOnlyErrors}
+        onShowOnlySuccess={showOnlySuccess}
+        onClearTimeRange={clearTimeRange}
+        onScrollToTable={scrollToTable}
+      />
     </div>
   );
 }

@@ -68,6 +68,105 @@
   letter-spacing: 0;
 }
 
+/* ─── Command palette (cmdk inside Radix Dialog) ──────────────────────────── */
+
+.cmdk-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-bg-overlay);
+  z-index: var(--z-palette);
+  animation: overlay-in var(--motion-base) var(--ease-out);
+}
+.cmdk-overlay[data-state='closed'] {
+  animation: overlay-out var(--motion-base) var(--ease-out) forwards;
+}
+
+.cmdk-content {
+  position: fixed;
+  top: 18vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(560px, calc(100vw - var(--space-8)));
+  z-index: calc(var(--z-palette) + 1);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: cmdk-in var(--motion-base) var(--ease-out);
+}
+.cmdk-content[data-state='closed'] {
+  animation: cmdk-out var(--motion-base) var(--ease-out) forwards;
+}
+
+@keyframes cmdk-in {
+  from { opacity: 0; transform: translate(-50%, calc(-1 * var(--space-2))); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+@keyframes cmdk-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+.cmdk-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border-default);
+  color: var(--color-text-muted);
+}
+.cmdk-input-wrap input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  outline: none;
+  box-shadow: none;
+}
+
+.cmdk-root [cmdk-list] {
+  max-height: 360px;
+  overflow-y: auto;
+  padding: var(--space-1);
+}
+.cmdk-root [cmdk-empty] {
+  padding: var(--space-4);
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+.cmdk-root [cmdk-group-heading] {
+  padding: var(--space-2) var(--space-3) var(--space-1);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 10px;
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-muted);
+}
+.cmdk-root [cmdk-item] {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-md);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+.cmdk-root [cmdk-item] svg {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+.cmdk-root [cmdk-item][data-selected='true'] {
+  background: var(--color-bg-row-hover);
+}
+.cmdk-root [cmdk-item][data-selected='true'] svg {
+  color: var(--color-text-primary);
+}
+
 /* ─── Tooltip (Radix) ─────────────────────────────────────────────────────── */
 
 /* Tooltip — Figma style: dark rounded card with subtle padding, white body
