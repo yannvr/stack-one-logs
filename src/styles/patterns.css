@@ -1760,9 +1760,39 @@
 
 .logs-table td[data-column='menu'],
 .logs-table td[data-column='chevron'],
-.logs-table td[data-column='underlyingCount'] {
+.logs-table td[data-column='underlyingCount'],
+.logs-table td[data-column='replay'] {
   width: 1%;
   padding-right: var(--space-2);
+}
+
+/* Replay button is hidden by default and revealed when the row is hovered or
+   when the button itself receives keyboard focus. Keeps the row scan clean
+   while making the primary action a single click away. */
+.logs-table .row-replay {
+  width: 24px;
+  height: 24px;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  opacity: 0;
+  transition: opacity var(--motion-fast) var(--ease-out),
+              background var(--motion-fast) var(--ease-out),
+              color var(--motion-fast) var(--ease-out),
+              border-color var(--motion-fast) var(--ease-out);
+}
+.logs-table tr:hover .row-replay,
+.logs-table .row-replay:focus-visible {
+  opacity: 1;
+  background: var(--color-bg-canvas);
+  border-color: var(--color-border-default);
+  color: var(--color-text-primary);
+}
+.logs-table .row-replay:hover {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent-hover);
 }
 
 /* ─── Pagination footer ───────────────────────────────────────────────────── */

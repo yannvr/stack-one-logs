@@ -1,4 +1,5 @@
 import {
+  ArrowsClockwise,
   CaretDown,
   CaretLeft,
   CaretRight,
@@ -188,6 +189,25 @@ export function LogsTable({ logs, onRowClick, selectedLogId, onReplay, onBatchRe
           const n = ctx.row.original.underlyingRequests.length;
           return n > 0 ? <span className="underlying-count">{n}</span> : null;
         },
+      }),
+      columnHelper.display({
+        id: 'replay',
+        header: '',
+        cell: (ctx) => (
+          <Tooltip content="Replay request">
+            <button
+              type="button"
+              className="icon row-replay"
+              aria-label="Replay request"
+              onClick={(e) => {
+                e.stopPropagation();
+                onReplay?.(ctx.row.original);
+              }}
+            >
+              <ArrowsClockwise size={14} weight="regular" />
+            </button>
+          </Tooltip>
+        ),
       }),
       columnHelper.display({
         id: 'menu',
