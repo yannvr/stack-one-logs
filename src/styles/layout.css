@@ -1,0 +1,264 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Layout — page-level grids and shells.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.logs-page {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  height: 100vh;
+  background: var(--color-bg-canvas);
+}
+
+/* ─── Sidebar ─────────────────────────────────────────────────────────────── */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--color-border-default);
+  background: var(--color-bg-canvas);
+  min-height: 0;
+  animation: sidebar-rise var(--motion-slow) var(--ease-out) both;
+  transition: width var(--motion-base) var(--ease-out);
+  overflow: hidden;
+}
+
+.logs-page {
+  transition: grid-template-columns var(--motion-base) var(--ease-out);
+}
+.logs-page:has(.sidebar[data-collapsed]) {
+  grid-template-columns: 64px 1fr;
+}
+
+@keyframes sidebar-rise {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Collapsed sidebar — icons only, labels hidden but still in DOM for a11y. */
+.sidebar[data-collapsed] .env-name,
+.sidebar[data-collapsed] .env-caret,
+.sidebar[data-collapsed] .sidebar-section-title,
+.sidebar[data-collapsed] .sidebar-link span,
+.sidebar[data-collapsed] .account-name,
+.sidebar[data-collapsed] .account-gear {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  pointer-events: none;
+}
+
+.sidebar[data-collapsed] .env-switcher,
+.sidebar[data-collapsed] .sidebar-link,
+.sidebar[data-collapsed] .account-button {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.sidebar[data-collapsed] .sidebar-nav {
+  padding-left: var(--space-1);
+  padding-right: var(--space-1);
+}
+
+.sidebar-header {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.env-switcher {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-md);
+}
+.env-switcher:hover {
+  background: var(--color-bg-row-hover);
+}
+.env-mark {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+}
+.env-name {
+  flex: 1;
+  text-align: left;
+}
+.env-caret {
+  color: var(--color-text-muted);
+}
+
+.sidebar-nav {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.sidebar-section-title {
+  text-transform: none;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-muted);
+  padding: 0 var(--space-3);
+  margin-bottom: var(--space-1);
+}
+
+.sidebar-nav ul {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  height: 32px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--motion-fast) var(--ease-out),
+    color var(--motion-fast) var(--ease-out);
+}
+.sidebar-link:hover {
+  background: var(--color-bg-row-hover);
+  color: var(--color-text-primary);
+}
+.sidebar-link.active {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-hover);
+}
+.sidebar-link[data-stub='true'] {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+.sidebar-link[data-stub='true']:hover {
+  background: var(--color-bg-row-hover);
+  color: var(--color-text-secondary);
+}
+
+.sidebar-footer {
+  border-top: 1px solid var(--color-border-default);
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.sidebar-toggle {
+  width: 100%;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background var(--motion-fast) var(--ease-out), color var(--motion-fast) var(--ease-out);
+}
+.sidebar-toggle:hover {
+  background: var(--color-bg-row-hover);
+  color: var(--color-text-primary);
+}
+
+.account-button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+}
+.account-button:hover {
+  background: var(--color-bg-row-hover);
+}
+.account-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border-default);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-secondary);
+}
+.account-name {
+  flex: 1;
+  text-align: left;
+  font-size: var(--text-md);
+}
+.account-gear {
+  color: var(--color-text-muted);
+}
+
+/* ─── Main + Top bar ──────────────────────────────────────────────────────── */
+
+.main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.top-bar {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-6);
+  border-bottom: 1px solid var(--color-border-default);
+  background: var(--color-bg-canvas);
+  flex-shrink: 0;
+  animation: section-rise var(--motion-base) var(--ease-out) both;
+  animation-delay: 60ms;
+}
+
+.top-bar h1 {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.005em;
+}
+
+.top-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.main-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-5) var(--space-6) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 1600px;
+  width: 100%;
+}

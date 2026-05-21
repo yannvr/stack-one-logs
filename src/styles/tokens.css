@@ -1,0 +1,203 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Tokens — three layers: reference → semantic → component.
+   Source of truth for the design system. Extracted from Figma.
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Reference (raw values) ────────────────────────────────────────────── */
+  /* Palette — extracted from Figma (brand fidelity). */
+  --green-300: #4ed09a;
+  --green-500: #00af66;
+  --green-700: #047b43;
+  --red-300: #f78a8a;
+  --red-500: #ef3737;
+  --red-700: #b22020;
+  --amber-500: #f59e0b;
+  --purple-300: #8a8be0;
+  --purple-500: #4d4eba;
+  --blue-500: #2563eb;
+
+  --grey-950: #0a0a0a;
+  --grey-900: #141414;
+  --grey-800: #1e1e1e;
+  --grey-700: #2a2a2a;
+  --grey-600: #3a3a3a;
+  --grey-500: #7b7b7b;
+  --grey-400: #bbbbbb;
+  --grey-300: #d4d4d4;
+  --grey-200: #e8e8e8;
+  --grey-100: #f1f1f1;
+  --grey-50:  #fafafa;
+  --white:    #ffffff;
+
+  /* ── Spacing (4px base) ────────────────────────────────────────────────── */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ── Radii ─────────────────────────────────────────────────────────────── */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* ── Typography ──────────────────────────────────────────────────────────
+     Geist as the single distinctive sans for the entire UI — same family
+     across body, headers, and hero numbers. JetBrains Mono for code and
+     monospaced data. Brand-fidelity: no decorative display fonts.
+
+     Hierarchy is communicated through weight, size, tracking, and tabular
+     numerals — not font-family swaps.
+  */
+  --font-sans: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-md: 13px;
+  --text-base: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+  --text-2xl: 28px;
+  --text-display: 40px;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  --leading-tight: 1.2;
+  --leading-base: 1.5;
+
+  /* ── Motion ────────────────────────────────────────────────────────────── */
+  --motion-instant: 80ms;
+  --motion-fast: 120ms;
+  --motion-base: 180ms;
+  --motion-slow: 280ms;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Z-index scale ─────────────────────────────────────────────────────── */
+  --z-base: 0;
+  --z-sticky: 10;
+  --z-overlay: 100;
+  --z-drawer: 200;
+  --z-toast: 300;
+  --z-palette: 400;
+
+  /* ── Component tokens ──────────────────────────────────────────────────── */
+  --header-height: 60px;
+  --sidebar-width: 280px;
+  --drawer-width: clamp(560px, 60vw, 880px);
+  --row-height: 44px;
+  --chart-height: 200px;
+}
+
+/* ─── Light theme (default) — Figma-faithful brand palette ───────────────── */
+:root,
+:root[data-theme='light'] {
+  --color-bg-canvas: var(--white);
+  --color-bg-elevated: var(--white);
+  --color-bg-subtle: var(--grey-50);
+  --color-bg-row-hover: var(--grey-100);
+  --color-bg-row-stripe: rgba(10, 10, 10, 0.018);
+  --color-bg-row-selected: color-mix(in srgb, var(--green-500) 10%, var(--white));
+  --color-bg-overlay: rgba(10, 10, 10, 0.32);
+  --color-bg-tooltip: var(--grey-950);
+
+  --color-text-primary: var(--grey-950);
+  --color-text-secondary: var(--grey-700);
+  --color-text-muted: var(--grey-500);
+  --color-text-tag: var(--grey-400);
+  --color-text-inverse: var(--white);
+  --color-text-link: var(--green-700);
+
+  --color-border-default: var(--grey-200);
+  --color-border-strong: var(--grey-300);
+  --color-border-focus: var(--green-500);
+
+  --color-accent: var(--green-500);
+  --color-accent-hover: var(--green-700);
+  --color-accent-soft: color-mix(in srgb, var(--green-500) 14%, transparent);
+
+  --color-status-success: var(--green-500);
+  --color-status-success-soft: color-mix(in srgb, var(--green-500) 14%, transparent);
+  --color-status-error: var(--red-500);
+  --color-status-error-soft: color-mix(in srgb, var(--red-500) 14%, transparent);
+  --color-status-warning: var(--amber-500);
+  --color-status-warning-soft: color-mix(in srgb, var(--amber-500) 14%, transparent);
+  --color-status-info: var(--purple-500);
+  --color-status-info-soft: color-mix(in srgb, var(--purple-500) 14%, transparent);
+
+  --color-method-get: var(--blue-500);
+  --color-method-post: var(--purple-500);
+  --color-method-put: var(--amber-500);
+  --color-method-patch: var(--amber-500);
+  --color-method-delete: var(--red-500);
+
+  --color-chart-success: var(--green-500);
+  --color-chart-error: var(--red-500);
+  --color-chart-grid: var(--grey-200);
+  --color-chart-axis: var(--grey-400);
+
+  --shadow-sm: 0 1px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.16);
+  --shadow-button: 0 1px 0 rgba(0, 0, 0, 0.15);
+  --shadow-fabric: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* ─── Dark theme ──────────────────────────────────────────────────────────── */
+:root[data-theme='dark'] {
+  --color-bg-canvas: var(--grey-950);
+  --color-bg-elevated: var(--grey-900);
+  --color-bg-subtle: var(--grey-900);
+  --color-bg-row-hover: var(--grey-800);
+  --color-bg-row-stripe: rgba(255, 255, 255, 0.02);
+  --color-bg-row-selected: color-mix(in srgb, var(--green-500) 18%, var(--grey-950));
+  --color-bg-overlay: rgba(0, 0, 0, 0.6);
+  --color-bg-tooltip: var(--grey-700);
+
+  --color-text-primary: var(--grey-50);
+  --color-text-secondary: var(--grey-300);
+  --color-text-muted: var(--grey-500);
+  --color-text-tag: var(--grey-500);
+  --color-text-inverse: var(--grey-950);
+  --color-text-link: var(--green-300);
+
+  --color-border-default: var(--grey-700);
+  --color-border-strong: var(--grey-600);
+  --color-border-focus: var(--green-300);
+
+  --color-accent: var(--green-300);
+  --color-accent-hover: var(--green-500);
+  --color-accent-soft: color-mix(in srgb, var(--green-300) 22%, transparent);
+
+  --color-status-success: var(--green-300);
+  --color-status-success-soft: color-mix(in srgb, var(--green-300) 20%, transparent);
+  --color-status-error: var(--red-300);
+  --color-status-error-soft: color-mix(in srgb, var(--red-300) 20%, transparent);
+  --color-status-warning: var(--amber-300);
+  --color-status-warning-soft: color-mix(in srgb, var(--amber-300) 20%, transparent);
+  --color-status-info: #a499e8;
+  --color-status-info-soft: color-mix(in srgb, #a499e8 20%, transparent);
+
+  --color-chart-grid: var(--grey-700);
+  --color-chart-axis: var(--grey-500);
+
+  --shadow-sm: 0 1px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.55);
+  --shadow-button: 0 1px 0 rgba(0, 0, 0, 0.55);
+  --shadow-fabric: 0 0 12px rgba(0, 0, 0, 0.55);
+}
