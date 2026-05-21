@@ -1228,10 +1228,13 @@
   border-radius: var(--radius-lg);
   padding: var(--space-4) var(--space-5) var(--space-3);
   position: relative;
-  overflow: hidden;
   flex-shrink: 0;
   animation: section-rise var(--motion-slow) var(--ease-out) both;
   animation-delay: 120ms;
+}
+
+.chart-body {
+  overflow: hidden;
 }
 
 @keyframes section-rise {

@@ -265,8 +265,10 @@ export function generateLogs(count = 200, referenceDate = new Date()): Log[] {
  * that many Log objects. Distribution mirrors the Figma's 97/3 success-error
  * ratio with smoothed bar-to-bar variance.
  */
-export const CHART_BUCKET_MS = 8 * 1000;
-export const CHART_BUCKET_COUNT = 90;
+// 12s buckets × 60 = 12 minutes visible. 60 bars across the chart width gives
+// each bar more breathing room than 90 — closer to the Figma's visual density.
+export const CHART_BUCKET_MS = 12 * 1000;
+export const CHART_BUCKET_COUNT = 60;
 export const CHART_WINDOW_MS = CHART_BUCKET_MS * CHART_BUCKET_COUNT;
 
 export function generateChartSummary(bucketCount = CHART_BUCKET_COUNT, now = Date.now()): ChartSummary {
@@ -278,10 +280,11 @@ export function generateChartSummary(bucketCount = CHART_BUCKET_COUNT, now = Dat
 
   for (let i = bucketCount - 1; i >= 0; i--) {
     // Slight wave + noise so the chart reads as live traffic, not a flat ribbon.
-    const wave = Math.sin(i / 6) * 200;
-    const base = 1500 + wave;
-    const success = Math.max(400, Math.floor(base + faker.number.int({ min: -200, max: 200 })));
-    const error = Math.max(0, Math.floor(success * 0.035 + faker.number.int({ min: -10, max: 60 })));
+    // Larger buckets (12s) → larger per-bucket totals.
+    const wave = Math.sin(i / 6) * 300;
+    const base = 2300 + wave;
+    const success = Math.max(600, Math.floor(base + faker.number.int({ min: -300, max: 300 })));
+    const error = Math.max(0, Math.floor(success * 0.035 + faker.number.int({ min: -10, max: 80 })));
     const timestamp = new Date(now - i * bucketMs).toISOString();
     buckets.push({ timestamp, success, error });
     totalSuccess += success;
