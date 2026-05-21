@@ -8,3 +8,12 @@ dist-ssr
 
 # Temporary screenshots from MCP testing
 .tmp-*
+
+# Phase B/C deliverables — kept locally for interview presentation,
+# not part of the source-code artifact reviewed by the employer.
+docs/critique.md
+docs/improvements.md
+docs/audit.md
+docs/audit/
+docs/figma/
+docs/improved/

@@ -1,6 +1,6 @@
 # StackOne Logs
 
-An interview take on StackOne's **Request Logs** page: a recreation of the Figma flow, a written UX critique, a design pass on the improvements, and a working implementation.
+An interview take on StackOne's **Request Logs** page: a faithful recreation of the Figma flow with a critiqued and reasoned improvement pass on top.
 
 > **Mission** · Help engineers find and fix integration failures fast. Every interaction in the Logs section accelerates the loop: *spot anomaly → drill into a request → understand why → take corrective action*. The **request** is the entity; everything else is a lens onto it.
 
@@ -27,7 +27,37 @@ This is the loop the brief asks for — *spot anomaly → drill in → understan
 - **URL-synced state** — every filter, the slice, the selected log, the active tab live in the URL. Refresh, back, and link-sharing all just work, and a chart slice becomes a shareable artifact.
 - **Surfaced Replay on row hover** — the daily action moves from "two clicks behind a `…` menu" to one click on the row.
 - **4-tier status pills with non-color signal** — 2xx ✓ / 3xx ⇄ / 4xx ⚠ / 5xx ✕. Client vs server failures distinguishable at a glance. WCAG 1.4.1.
-- **⌘K command palette, vim-style shortcuts, installable PWA** — opt-in power-user surface for after the click-driven flow is internalised. Speed without taking anything away from discoverability.
+- **⌘K command palette, vim-style shortcuts, installable PWA** — see *CLI in the UI* below.
+- **OS-matched theme** — `prefers-color-scheme` by default — see *Why OS theme matching matters* below.
+
+---
+
+## CLI in the UI
+
+Integration engineers debug logs all day. They live in the terminal: muscle memory, exact recall, no mouse. A dashboard that forces them back into clicking through menus is a downgrade for the work they do most.
+
+This build keeps the click-driven UI as the default — every action is reachable with a mouse — and layers a **terminal-grade keyboard surface** on top:
+
+- **⌘K command palette** — every action, filter, navigation reachable from one entry point. Type-ahead matching, fuzzy search, no memorisation.
+- **`j` / `k` / `Enter` / `Esc`** — vim-style row navigation, drawer toggle. No reach for the trackpad to scan a list.
+- **`/` focus search · `r` refresh** — the two daily operations as single keystrokes.
+- **URL as a stateful command line** — every filter, the chart slice, the selected log live in the address bar. Share a link instead of describing what you filtered.
+- **Installable PWA** — once installed, opens in its own window with no browser chrome. The dashboard sits beside the terminal as a peer app, not a tab buried in 40 others.
+
+Discoverability is preserved: nothing is keyboard-only, the palette advertises itself with the `⌘K` chip in the top bar, and every shortcut has a tooltip equivalent. **Click when exploring, type when you know where you're going.**
+
+---
+
+## Why OS theme matching matters
+
+The theme system defaults to `auto` — it follows the OS — and only persists an explicit choice when the user overrides it. This is not decorative.
+
+- **Engineers context-switch between terminal and dashboard.** Their terminal is almost always dark. A dashboard that ignores the system setting forces a retina-resetting brightness flash on every alt-tab. Operations work happens at 2am — that flash is a real cost.
+- **Respecting the OS is a trust signal.** Apps that ignore system preferences feel bolted-on; apps that adapt feel native. For an internal tool that engineers will use for hours, the difference compounds.
+- **It removes a decision.** A theme toggle is a feature; an app that already matches the OS is a behaviour. Defaults that already fit don't need to be configured.
+- **`prefers-reduced-motion` is honoured for the same reason** — animations are zeroed out site-wide when the user has asked the OS for less movement.
+
+The toggle is still there for the cases the OS gets wrong (light terminal users, presentation mode), and the choice is persisted. The defaults just happen to be already correct.
 
 ---
 
@@ -50,7 +80,7 @@ The mock data layer simulates 800–1200ms of network latency so skeleton states
 
 **Recreation of all 30 Figma frames** as a single working app: chart + filterable table + detail drawer, empty / loading / expanded states, Request/Response accordions, underlying-requests tab, expiry variants, and the full AI Error Explainer state machine (gated → collapsed → generating → generated → feedback → submitted).
 
-**Improvements shipped on top** (see [docs/improvements.md](docs/improvements.md)) — detailed above:
+**Improvements shipped on top** — detailed above:
 
 1. **Scope-to-Slice** — chart ↔ table hover sync and click-to-filter as the primary investigation pattern
 2. **URL-synced state** — every filter, slice, selected log, and active tab live in the URL
@@ -58,7 +88,7 @@ The mock data layer simulates 800–1200ms of network latency so skeleton states
 4. **4-tier status pills** with non-color signal
 5. **⌘K palette + shortcuts + PWA** — power-user surface layered on top
 
-The Figma's frozen-timestamp pattern (every row showing `21:05:19.123`) is replaced by realistic varied timestamps from Faker — see [docs/critique.md § 1.1](docs/critique.md).
+The Figma's frozen-timestamp pattern (every row showing `21:05:19.123`) is replaced by realistic varied timestamps from Faker.
 
 ![Default dark view](docs/screenshots/02-default-dark.png)
 
@@ -176,10 +206,7 @@ src/
     └── keyboard.ts               # useKeyboardShortcut — exact modifier matching
 
 docs/
-├── critique.md                   # Phase B — 17-issue UX audit, anchored to Figma frames
-├── improvements.md               # Phase C — design proposals for shipped items
-├── audit.md                      # Per-frame Figma-vs-implementation discrepancy log
-└── screenshots/                  # Final state captures
+└── screenshots/                  # Final state captures referenced by this README
 ```
 
 CSS uses cascade layers so specificity is predictable and new patterns slot in without fighting the cascade.
@@ -197,13 +224,13 @@ CSS uses cascade layers so specificity is predictable and new patterns slot in w
 
 **Bucket-mate highlight only fires from the chart side.** Hovering a row originally lit up every other row in the same 12s bucket — visually noisy. The hover store now tracks `hoverSource: 'bar' | 'row'`; row-hover only lifts the matching bar; bar-hover lights bucket-mates.
 
-**Mocked data favours realism over fidelity.** The Figma's frozen `21:05:19.123` timestamp on every row would have been technically faithful but functionally misleading — see [critique 1.1](docs/critique.md). One log per visible chart bucket is seeded so click-filtering a bar always yields results.
+**Mocked data favours realism over fidelity.** The Figma's frozen `21:05:19.123` timestamp on every row would have been technically faithful but functionally misleading. One log per visible chart bucket is seeded so click-filtering a bar always yields results.
 
 **No JS-driven motion.** Drawer slide, accordion expand, toast spring, row pulse — all CSS transitions targeting Radix's `[data-state="open|closed"]` attributes. Smaller bundle, single motion language.
 
 **Status pill is 4-tier.** 4xx and 5xx are categorically different problems for an integration engineer; the previous all-red treatment hid that. Amber-for-client-error, red-for-server-error is the operational signal.
 
-Full critique and per-item design rationales: [docs/critique.md](docs/critique.md) · [docs/improvements.md](docs/improvements.md) · [docs/audit.md](docs/audit.md).
+The full per-issue critique, per-improvement design proposals, and per-frame Figma audit live alongside the working app and are walked through in the interview presentation rather than checked into the source tree.
 
 </details>
 
@@ -223,7 +250,7 @@ Full critique and per-item design rationales: [docs/critique.md](docs/critique.m
 <details>
 <summary><strong>Out of scope</strong></summary>
 
-Documented in [docs/critique.md](docs/critique.md) as "what we'd do next":
+Captured for the interview walkthrough as "what we'd do next":
 
 - Bulk row actions (multi-select Replay)
 - Saved searches / recently viewed
