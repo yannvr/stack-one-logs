@@ -6,6 +6,7 @@ import {
   Check,
   CheckCircle,
   Copy,
+  Info,
   Sparkle,
   Star,
 } from '@phosphor-icons/react';
@@ -174,6 +175,7 @@ function UrlStrip({ url }: { url: string }) {
 
 function DetailsTab({ log, onToast }: { log: Log; onToast?: (msg: string) => void }) {
   const primary = log.underlyingRequests[0];
+  const isError = log.status >= 400;
   return (
     <div className="details-tab">
       <Accordion.Root type="multiple" defaultValue={['response']} className="accordion">
@@ -204,13 +206,13 @@ function DetailsTab({ log, onToast }: { log: Log; onToast?: (msg: string) => voi
                 : null,
             },
           ]} />
+          {/* AI Explainer is an error-only feature, scoped to the Response section
+              per Figma frame 07 — sits below Headers/Body as the third sub-row. */}
+          {isError ? (
+            <ErrorExplainer key={log.id} log={log} onToast={onToast} />
+          ) : null}
         </Section>
       </Accordion.Root>
-
-      {/* AI Explainer is an error-only feature — only render for 4xx / 5xx logs. */}
-      {log.status >= 400 ? (
-        <ErrorExplainer key={log.id} log={log} onToast={onToast} />
-      ) : null}
     </div>
   );
 }
@@ -423,15 +425,31 @@ function ErrorExplainer({ log, onToast }: { log: Log; onToast?: (msg: string) =>
   }
 
   if (state === 'gated') {
+    // Reachable only if a log somehow has status >= 400 but hasAiExplainer = false.
+    // Mock data sets hasAiExplainer = true for all errors, so this is unreachable
+    // in practice — kept for the design-system completeness story.
     return (
-      <div className="explainer-row gated">
+      <div className="sub-row explainer-row gated">
         <span className="explainer-label">
           <Sparkle size={12} weight="regular" />
           Error Explainer
         </span>
         <span className="explainer-meta">Feature Not Enabled</span>
         <span className="explainer-link">
-          via <a href="#">Advanced Logs</a> &amp; <a href="#">AI Features</a>
+          via <a href="#" onClick={(e) => e.preventDefault()}>Advanced Logs</a>
+          {' '}&amp;{' '}
+          <a href="#" onClick={(e) => e.preventDefault()}>AI Features</a>
+          <Tooltip
+            content={
+              'To enable the Error Explainer, please first enable the Error Explainer feature via AI Features.'
+            }
+            side="left"
+            align="end"
+          >
+            <span className="explainer-info" tabIndex={0} aria-label="Why is this disabled?">
+              <Info size={12} weight="regular" />
+            </span>
+          </Tooltip>
         </span>
       </div>
     );
@@ -441,16 +459,16 @@ function ErrorExplainer({ log, onToast }: { log: Log; onToast?: (msg: string) =>
     return (
       <button
         type="button"
-        className="explainer-row collapsed"
+        className="sub-row explainer-row collapsed"
         onClick={() => setState('generating')}
       >
         <span className="explainer-label">
           <Sparkle size={12} weight="regular" />
           Error Explainer
         </span>
-        <span className="explainer-meta">◇ Open to Generate</span>
+        <span className="explainer-meta">Open to Generate</span>
         <span className="explainer-link">
-          via <a href="#">Advanced Logs</a>
+          via <span className="explainer-link-text">Advanced Logs</span>
         </span>
       </button>
     );
@@ -537,13 +555,11 @@ function ErrorExplainer({ log, onToast }: { log: Log; onToast?: (msg: string) =>
           <div className="feedback">
             <div className="feedback-prompt">
               <span>How would you rate this error explanation?</span>
+              {/* Rating itself is its own visible feedback — no toast on click.
+                  Only the explicit Submit action fires the "Feedback Submitted" toast. */}
               <StarRating
                 value={rating}
-                onChange={(n) => {
-                  const wasZero = rating === 0;
-                  setRating(n);
-                  if (wasZero) onToast?.('Rating Provided');
-                }}
+                onChange={setRating}
               />
             </div>
             {ratingVisible ? (

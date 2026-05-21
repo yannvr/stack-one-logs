@@ -76,8 +76,18 @@ export function LogsPage() {
   const onReplay = useCallback(
     async (log: Log) => {
       toaster.show('Replaying Request', 'progress');
-      await replayLog(log.id);
-      toaster.show('Success');
+      const result = await replayLog(log.id);
+      toaster.show('Success', 'success', {
+        label: 'Logs',
+        onClick: () => {
+          // In a real app this would jump to the new log entry; for the
+          // mock it just scrolls back to the top of the table.
+          const card = document.querySelector('.logs-table-card');
+          card?.scrollIntoView({ behavior: 'smooth' });
+          // eslint-disable-next-line no-console
+          console.log('[stack-one] would navigate to log', result.newLogId);
+        },
+      });
     },
     [toaster],
   );

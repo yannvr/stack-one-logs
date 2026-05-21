@@ -637,20 +637,24 @@
 
 /* ─── Drawer: AI Explainer ────────────────────────────────────────────────── */
 
+/* Explainer row — when it sits inside the Response sub-accordion (sub-row),
+   inherits the sub-row layout. When it's standalone (legacy unreachable path),
+   gets its own border + radius. */
 .explainer-row {
   display: inline-flex;
   align-items: center;
   gap: var(--space-3);
   width: 100%;
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-4);
   background: var(--color-bg-canvas);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
   font-size: var(--text-sm);
   text-align: left;
-  margin-top: var(--space-2);
+  border: none;
+  border-top: 1px solid var(--color-border-default);
+  border-radius: 0;
 }
 .explainer-row:hover { background: var(--color-bg-row-hover); }
+
 .explainer-label {
   display: inline-flex;
   align-items: center;
@@ -662,16 +666,54 @@
   color: var(--color-text-muted);
   flex: 1;
 }
-.explainer-link { color: var(--color-text-muted); font-size: var(--text-xs); }
+.explainer-link {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.explainer-link a {
+  color: var(--color-text-secondary);
+  text-decoration: underline;
+  text-decoration-color: var(--color-border-strong);
+  text-underline-offset: 2px;
+}
+.explainer-link a:hover {
+  color: var(--color-text-primary);
+  text-decoration-color: var(--color-text-secondary);
+}
+.explainer-link-text {
+  color: var(--color-text-secondary);
+  text-decoration: underline;
+  text-decoration-color: var(--color-border-strong);
+  text-underline-offset: 2px;
+}
+
+.explainer-info {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  cursor: help;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+  margin-left: var(--space-1);
+}
+.explainer-info:hover,
+.explainer-info:focus-visible {
+  color: var(--color-text-primary);
+}
 
 .explainer-expanded {
   display: flex;
   flex-direction: column;
   background: var(--color-bg-canvas);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
+  border: none;
+  border-top: 1px solid var(--color-border-default);
+  border-radius: 0;
   overflow: hidden;
-  margin-top: var(--space-2);
 }
 
 /* Generated header — soft accent-tinted background to signal AI content. */
@@ -905,6 +947,25 @@
   gap: var(--space-2);
 }
 .toast-title svg { color: var(--color-status-success); }
+
+.toast-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: var(--space-3);
+  padding: 0 var(--space-2);
+  height: 22px;
+  font-size: var(--text-xs);
+  color: var(--white);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--motion-fast) var(--ease-out);
+}
+.toast-action:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
 
 @keyframes toast-in  { from { opacity: 0; transform: translateY(-12px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes toast-out { from { opacity: 1; }                                            to { opacity: 0; transform: translateY(-12px); } }

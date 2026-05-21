@@ -225,7 +225,10 @@ function generateLog(referenceDate: Date, bucketWindowMs = 12 * 60 * 1000): Log 
       { length: faker.number.int({ min: 0, max: 4 }) },
       () => generateUnderlyingRequest(status),
     ),
-    hasAiExplainer: status >= 400 && faker.datatype.boolean({ probability: 0.6 }),
+    // AI Explainer is unconditionally available for error logs — it's the
+    // feature's primary use case, so gating it on a flag would make errors
+    // hard to investigate. Non-errors never get the explainer.
+    hasAiExplainer: status >= 400,
   };
 }
 
