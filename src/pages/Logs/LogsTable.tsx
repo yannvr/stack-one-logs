@@ -43,6 +43,17 @@ type Props = {
   selectedLogId?: string | null;
   onReplay?: (log: Log) => void;
   onBatchReplay?: (log: Log) => void;
+  /** Controlled column filter values. URL-driven from the parent. */
+  columnFilterValues?: {
+    status?: string[];
+    method?: string[];
+    account?: string[];
+    source?: string[];
+  };
+  onColumnFilterChange?: (
+    key: 'status' | 'method' | 'account' | 'source',
+    values: string[],
+  ) => void;
 };
 
 const PAGE_SIZES = [10, 25, 50, 100];
@@ -72,7 +83,15 @@ function statusClass(status: number): string {
   return 'server-error';
 }
 
-export function LogsTable({ logs, onRowClick, selectedLogId, onReplay, onBatchReplay }: Props) {
+export function LogsTable({
+  logs,
+  onRowClick,
+  selectedLogId,
+  onReplay,
+  onBatchReplay,
+  columnFilterValues,
+  onColumnFilterChange,
+}: Props) {
   const hoveredBucket = useHoverStore((s) => s.hoveredBucket);
   const hoverSource = useHoverStore((s) => s.hoverSource);
   const hoverFromRow = useHoverStore((s) => s.hoverFromRow);
@@ -84,8 +103,19 @@ export function LogsTable({ logs, onRowClick, selectedLogId, onReplay, onBatchRe
     { id: 'requestedAt', desc: true },
   ]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE });
+
+  // Column filters are derived from controlled props (URL-synced upstream) so
+  // bookmarked / refreshed URLs restore the filter state automatically.
+  const columnFilters: ColumnFiltersState = useMemo(() => {
+    const v = columnFilterValues ?? {};
+    const f: ColumnFiltersState = [];
+    if (v.status && v.status.length) f.push({ id: 'status', value: v.status });
+    if (v.method && v.method.length) f.push({ id: 'request', value: v.method });
+    if (v.account && v.account.length) f.push({ id: 'account', value: v.account });
+    if (v.source && v.source.length) f.push({ id: 'source', value: v.source });
+    return f;
+  }, [columnFilterValues]);
 
   // Reset to page 1 whenever the underlying logs array or filters change.
   useEffect(() => {
@@ -106,11 +136,13 @@ export function LogsTable({ logs, onRowClick, selectedLogId, onReplay, onBatchRe
   const getFilterValues = (id: string): string[] =>
     (columnFilters.find((f) => f.id === id)?.value as string[] | undefined) ?? [];
 
+  // Map TanStack column ids back to the upstream filter keys.
   const setFilterValues = (id: string, next: string[]) => {
-    setColumnFilters((cur) => {
-      const without = cur.filter((f) => f.id !== id);
-      return next.length === 0 ? without : [...without, { id, value: next }];
-    });
+    const key =
+      id === 'request' ? 'method'
+        : id === 'status' || id === 'account' || id === 'source' ? id
+        : null;
+    if (key) onColumnFilterChange?.(key, next);
   };
 
   const columns = useMemo(
@@ -239,7 +271,6 @@ export function LogsTable({ logs, onRowClick, selectedLogId, onReplay, onBatchRe
     state: { sorting, columnVisibility, columnFilters, pagination },
     onSortingChange: setSorting,
     onColumnVisibilityChange: setColumnVisibility,
-    onColumnFiltersChange: setColumnFilters,
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),

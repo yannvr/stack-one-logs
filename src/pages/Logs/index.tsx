@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { Sidebar } from '~/components/Sidebar';
 import { Toaster, useToasterState } from '~/components/Toaster';
@@ -9,6 +8,7 @@ import { useQuery } from '~/data/useQuery';
 import type { ChartBucket, Log } from '~/data/types';
 import { CHART_BUCKET_MS } from '~/data/mock';
 import { useSidebarStore } from '~/state/sidebarStore';
+import { useUrlState } from '~/state/urlState';
 import { LogsChart } from './LogsChart';
 import { LogsDetail } from './LogsDetail';
 import { LogsEmpty } from './LogsEmpty';
@@ -16,45 +16,46 @@ import { LogsFilters, type FiltersValue } from './LogsFilters';
 import { ChartSkeleton, TableSkeleton } from './LogsLoading';
 import { LogsTable } from './LogsTable';
 
-const INITIAL_FILTERS: FiltersValue = {
-  query: '',
-  range: undefined,
-  backgroundLogs: false,
+const STATUS_CLASS_MATCH: Record<string, (status: number) => boolean> = {
+  success: (s) => s < 300,
+  redirect: (s) => s >= 300 && s < 400,
+  'client-error': (s) => s >= 400 && s < 500,
+  'server-error': (s) => s >= 500,
 };
 
 export function LogsPage() {
-  const [searchParams] = useSearchParams();
-  const isEmptyDemo = searchParams.get('state') === 'empty';
+  const { state, setQuery, setRange, setSelectedLogId, setColumnFilter } = useUrlState();
+  const { query, range, columnFilters, selectedLogId, isEmptyDemo } = state;
 
-  const [filters, setFilters] = useState<FiltersValue>(INITIAL_FILTERS);
-  const [selectedLog, setSelectedLog] = useState<Log | null>(null);
   const collapseForDrawer = useSidebarStore((s) => s.collapseForDrawer);
 
-  // First time a log opens, collapse the sidebar one-way. Subsequent opens are
-  // no-ops; closing the drawer never re-expands. The user can re-expand via
-  // the toggle button whenever they want.
+  // Collapse the sidebar one-way when the drawer opens (per earlier user
+  // preference: don't auto-re-expand on close).
   useEffect(() => {
-    if (selectedLog !== null) collapseForDrawer();
-  }, [selectedLog, collapseForDrawer]);
+    if (selectedLogId) collapseForDrawer();
+  }, [selectedLogId, collapseForDrawer]);
 
   const { items: toasts, ctx: toaster, dismiss } = useToasterState();
 
+  // Logs query: only the search + date range params reach the service. Column
+  // filters (status/method/account/source) are applied client-side inside the
+  // table, so they don't drive a refetch.
   const fetchLogs = useCallback(
     () =>
       isEmptyDemo
         ? Promise.resolve({ logs: [], totalUnfiltered: 0 })
         : listLogs({
-            search: filters.query || undefined,
-            from: filters.range?.from?.toISOString(),
-            to: filters.range?.to?.toISOString(),
+            search: query || undefined,
+            from: range.from?.toISOString(),
+            to: range.to?.toISOString(),
           }),
-    [filters.query, filters.range, isEmptyDemo],
+    [query, range.from, range.to, isEmptyDemo],
   );
 
   const { data: logsResult, loading: logsLoading, refetch: refetchLogs } = useQuery(fetchLogs, [
-    filters.query,
-    filters.range?.from?.toISOString(),
-    filters.range?.to?.toISOString(),
+    query,
+    range.from?.toISOString(),
+    range.to?.toISOString(),
     isEmptyDemo,
   ]);
   const { data: summary, loading: summaryLoading, refetch: refetchSummary } = useQuery(
@@ -62,15 +63,29 @@ export function LogsPage() {
     [],
   );
 
-  // A single Refresh action refreshes both the chart and the table. Both go
-  // back into their loading states (skeletons) so the refresh is visible.
   const refetch = useCallback(() => {
     refetchLogs();
     refetchSummary();
   }, [refetchLogs, refetchSummary]);
 
-  const logs = logsResult?.logs ?? [];
+  // Apply the status-class column filter on top of what the server returned.
+  // (Method/account/source filters live in TanStack Table's filterFns.)
+  const logs = useMemo(() => {
+    const base = logsResult?.logs ?? [];
+    if (columnFilters.status.length === 0) return base;
+    const matchers = columnFilters.status
+      .map((s) => STATUS_CLASS_MATCH[s])
+      .filter(Boolean) as Array<(s: number) => boolean>;
+    return base.filter((log) => matchers.some((fn) => fn(log.status)));
+  }, [logsResult?.logs, columnFilters.status]);
+
   const hasLogs = logs.length > 0;
+
+  // Resolve the selected Log by id (from URL) into the actual object.
+  const selectedLog = useMemo(
+    () => (selectedLogId ? logs.find((l) => l.id === selectedLogId) ?? null : null),
+    [logs, selectedLogId],
+  );
 
   const onNavigate = useCallback(
     (direction: 1 | -1) => {
@@ -78,9 +93,9 @@ export function LogsPage() {
       const idx = logs.findIndex((l) => l.id === selectedLog.id);
       if (idx === -1) return;
       const next = logs[idx + direction];
-      if (next) setSelectedLog(next);
+      if (next) setSelectedLogId(next.id);
     },
-    [logs, selectedLog],
+    [logs, selectedLog, setSelectedLogId],
   );
 
   const onReplay = useCallback(
@@ -90,8 +105,6 @@ export function LogsPage() {
       toaster.show('Success', 'success', {
         label: 'Logs',
         onClick: () => {
-          // In a real app this would jump to the new log entry; for the
-          // mock it just scrolls back to the top of the table.
           const card = document.querySelector('.logs-table-card');
           card?.scrollIntoView({ behavior: 'smooth' });
           // eslint-disable-next-line no-console
@@ -111,22 +124,43 @@ export function LogsPage() {
     [toaster],
   );
 
-  // Click a bar → filter table to that bucket's time range. Pagination resets
-  // (handled inside LogsTable via useEffect on `logs`). No page-jumping happens
-  // on hover — only on explicit click.
   const onBucketClick = useCallback(
     (bucket: ChartBucket) => {
       const end = new Date(bucket.timestamp);
       const start = new Date(end.getTime() - CHART_BUCKET_MS);
-      setFilters((cur) => ({ ...cur, range: { from: start, to: end } }));
+      setRange(start, end);
       toaster.show(`Filtered to ${start.toLocaleTimeString()}–${end.toLocaleTimeString()}`);
     },
-    [toaster],
+    [setRange, toaster],
+  );
+
+  const filtersValue: FiltersValue = useMemo(
+    () => ({
+      query,
+      range: range.from ? { from: range.from, to: range.to } : undefined,
+      backgroundLogs: false,
+    }),
+    [query, range.from, range.to],
+  );
+
+  const onFiltersChange = useCallback(
+    (next: FiltersValue) => {
+      if (next.query !== query) setQuery(next.query);
+      const nextFrom = next.range?.from;
+      const nextTo = next.range?.to;
+      if (
+        nextFrom?.toISOString() !== range.from?.toISOString() ||
+        nextTo?.toISOString() !== range.to?.toISOString()
+      ) {
+        setRange(nextFrom, nextTo);
+      }
+    },
+    [query, range.from, range.to, setQuery, setRange],
   );
 
   const detailContent = useMemo(() => {
     if (!hasLogs) {
-      if (isEmptyDemo || (!filters.query && !filters.range)) {
+      if (isEmptyDemo || (!query && !range.from && !range.to)) {
         return <LogsEmpty />;
       }
       return <LogsEmpty variant="no-results" />;
@@ -135,12 +169,27 @@ export function LogsPage() {
       <LogsTable
         logs={logs}
         selectedLogId={selectedLog?.id ?? null}
-        onRowClick={setSelectedLog}
+        onRowClick={(log) => setSelectedLogId(log.id)}
         onReplay={onReplay}
         onBatchReplay={onBatchReplay}
+        columnFilterValues={columnFilters}
+        onColumnFilterChange={setColumnFilter}
       />
     );
-  }, [hasLogs, isEmptyDemo, filters.query, filters.range, logs, selectedLog?.id, onReplay, onBatchReplay]);
+  }, [
+    hasLogs,
+    isEmptyDemo,
+    query,
+    range.from,
+    range.to,
+    logs,
+    selectedLog?.id,
+    onReplay,
+    onBatchReplay,
+    columnFilters,
+    setColumnFilter,
+    setSelectedLogId,
+  ]);
 
   return (
     <div className="logs-page">
@@ -149,7 +198,7 @@ export function LogsPage() {
         <TopBar title="Request Logs" />
         <div className="main-content">
           {!isEmptyDemo && (
-            <LogsFilters value={filters} onChange={setFilters} onRefresh={refetch} />
+            <LogsFilters value={filtersValue} onChange={onFiltersChange} onRefresh={refetch} />
           )}
           {!isEmptyDemo && (summaryLoading || !summary ? (
             <ChartSkeleton />
@@ -162,9 +211,13 @@ export function LogsPage() {
 
       <LogsDetail
         log={selectedLog}
-        open={selectedLog !== null}
+        // Drawer open state comes from URL — not from whether `selectedLog`
+        // has resolved yet. Otherwise the drawer briefly closes during data
+        // refetches, fires Radix's onOpenChange(false), and the URL log id
+        // is wiped before the user could ever see the panel.
+        open={!!selectedLogId}
         onOpenChange={(next) => {
-          if (!next) setSelectedLog(null);
+          if (!next) setSelectedLogId(null);
         }}
         onNavigate={onNavigate}
         onToast={(msg) => toaster.show(msg)}
