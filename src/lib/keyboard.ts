@@ -38,8 +38,11 @@ function isTypingTarget(target: EventTarget | null): boolean {
 
 function matches(event: KeyboardEvent, spec: ShortcutSpec): boolean {
   if (event.key.toLowerCase() !== spec.key.toLowerCase()) return false;
-  if (spec.meta && !event.metaKey) return false;
-  if (spec.ctrl && !event.ctrlKey) return false;
+  // Require exact modifier-key state, not just presence-when-required. A spec
+  // for `j` should NOT match ⌘J / Ctrl+J — modifier combos belong to other
+  // shortcuts and must not collide.
+  if (!!spec.meta !== event.metaKey) return false;
+  if (!!spec.ctrl !== event.ctrlKey) return false;
   if (spec.shift !== undefined && spec.shift !== event.shiftKey) return false;
   return true;
 }

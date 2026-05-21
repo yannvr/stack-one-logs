@@ -49,6 +49,10 @@ export function LogsDetail({ log, open, onOpenChange, onNavigate, onToast }: Pro
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
+      // Don't intercept j/k when a modifier is held — those combos belong to
+      // other shortcuts (e.g. ⌘K opens the palette, and we don't want to
+      // accidentally navigate to the previous log on the way there).
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === 'ArrowDown' || e.key === 'j') {
         e.preventDefault();
         onNavigate?.(1);
