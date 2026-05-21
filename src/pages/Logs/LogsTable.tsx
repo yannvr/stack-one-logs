@@ -44,6 +44,7 @@ type Props = {
 };
 
 const PAGE_SIZES = [10, 25, 50, 100];
+const DEFAULT_PAGE_SIZE = 10;
 
 const METHOD_OPTIONS: FilterOption[] = (['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as HttpMethod[]).map((m) => ({
   value: m,
@@ -81,7 +82,7 @@ export function LogsTable({ logs, onRowClick, selectedLogId, onReplay, onBatchRe
   ]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 25 });
+  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE });
 
   // Reset to page 1 whenever the underlying logs array or filters change.
   useEffect(() => {

@@ -27,12 +27,14 @@ export function LogsPage() {
 
   const [filters, setFilters] = useState<FiltersValue>(INITIAL_FILTERS);
   const [selectedLog, setSelectedLog] = useState<Log | null>(null);
-  const setDrawerOpen = useSidebarStore((s) => s.setDrawerOpen);
+  const collapseForDrawer = useSidebarStore((s) => s.collapseForDrawer);
 
-  // Auto-collapse the sidebar while the detail drawer is open; restore when closed.
+  // First time a log opens, collapse the sidebar one-way. Subsequent opens are
+  // no-ops; closing the drawer never re-expands. The user can re-expand via
+  // the toggle button whenever they want.
   useEffect(() => {
-    setDrawerOpen(selectedLog !== null);
-  }, [selectedLog, setDrawerOpen]);
+    if (selectedLog !== null) collapseForDrawer();
+  }, [selectedLog, collapseForDrawer]);
 
   const { items: toasts, ctx: toaster, dismiss } = useToasterState();
 

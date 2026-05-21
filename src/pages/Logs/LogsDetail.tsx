@@ -179,19 +179,29 @@ function DetailsTab({ log, onToast }: { log: Log; onToast?: (msg: string) => voi
         </Section>
 
         <Section title="Response" rightBadge={<StatusPill status={log.status} />} value="response">
-          {primary?.response.available ? (
-            <SubAccordion items={[
-              { id: 'rheaders', title: 'Headers', content: <KeyValueList rows={primary.response.headers} /> },
-              { id: 'rbody', title: 'Body', content: primary.response.body ? <JsonViewer value={primary.response.body} /> : <p className="muted">No response body.</p> },
-            ]} />
-          ) : (
-            <p className="muted">Body — Not available</p>
-          )}
+          <SubAccordion items={[
+            {
+              id: 'rheaders',
+              title: 'Headers',
+              content: primary?.response.available && Object.keys(primary.response.headers).length > 0
+                ? <KeyValueList rows={primary.response.headers} />
+                : <p className="muted">Not available.</p>,
+            },
+            {
+              id: 'rbody',
+              title: 'Body',
+              content: primary?.response.available && primary.response.body
+                ? <JsonViewer value={primary.response.body} />
+                : <p className="muted">Not available.</p>,
+            },
+          ]} />
         </Section>
       </Accordion.Root>
 
-      {/* key resets the state machine when the user navigates between logs. */}
-      <ErrorExplainer key={log.id} log={log} onToast={onToast} />
+      {/* AI Explainer is an error-only feature — only render for 4xx / 5xx logs. */}
+      {log.status >= 400 ? (
+        <ErrorExplainer key={log.id} log={log} onToast={onToast} />
+      ) : null}
     </div>
   );
 }
@@ -377,7 +387,7 @@ function ErrorExplainer({ log, onToast }: { log: Log; onToast?: (msg: string) =>
         <span className="explainer-link">via <a href="#">Advanced Logs</a></span>
       </div>
       <div className="explainer-body">
-        <h4>Explainer:</h4>
+        <h4>Explainer</h4>
         <p>
           Based on the error information and documentation search results, I can provide the
           following resolution steps:
@@ -387,22 +397,43 @@ function ErrorExplainer({ log, onToast }: { log: Log; onToast?: (msg: string) =>
           {log.provider.name} account creation events. Please try the following steps:
         </p>
         <ol>
-          <li>Verify that the webhook URL is correctly configured and accessible</li>
+          <li>
+            Verify that the webhook URL{' '}
+            <a href="#" onClick={(e) => e.preventDefault()}>
+              https://typedwebhook.tools/webhook/e41181cd-8173-4f49-8c71-92edccb19889
+            </a>{' '}
+            is correctly configured and accessible.
+          </li>
           <li>
             Check that your {log.provider.name} integration has the necessary permissions to
-            create and manage webhook subscriptions
+            create and manage webhook subscriptions.
           </li>
-          <li>Re-register the webhook endpoint in your StackOne integration settings</li>
+          <li>
+            Re-register the webhook endpoint in your StackOne integration settings for the{' '}
+            {log.provider.name} <code>account_created</code> event.
+          </li>
         </ol>
         <p>
-          The 404 error suggests that either the webhook endpoint is not properly registered or
-          the URL is no longer valid. If this persists, contact StackOne support.
+          The <code>{log.status}</code> error suggests that either the webhook endpoint is not
+          properly registered or the URL is no longer valid. Since there are no provider errors
+          in the response, this indicates the issue is likely with the webhook configuration
+          rather than the {log.provider.name} API itself.
         </p>
-        <h4>Sources:</h4>
+        <p>
+          If the issue persists after trying these steps, please contact StackOne support via
+          your dedicated Slack channel or at{' '}
+          <a href="mailto:support@stackone.com" onClick={(e) => e.preventDefault()}>
+            support@stackone.com
+          </a>{' '}
+          for further assistance.
+        </p>
+        <h4>Sources</h4>
         <ol className="sources">
-          <li>Example Source Title — example.com</li>
-          <li>Example Source Title — example.com</li>
-          <li>Example Source Title — example.com</li>
+          <li>[1] Example Source Title — example.com</li>
+          <li>[2] Example Source Title — example.com</li>
+          <li>[3] Example Source Title — example.com</li>
+          <li>[4] Example Source Title — example.com</li>
+          <li>[5] Example Source Title — example.com</li>
         </ol>
         {state === 'submitted' ? (
           <p className="muted" style={{ marginTop: 'var(--space-3)' }}>Thanks for the feedback.</p>

@@ -62,8 +62,8 @@ const SUPPORT: NavSection = {
 };
 
 export function Sidebar() {
-  const isCollapsed = useSidebarStore((s) => s.isCollapsed());
-  const toggle = useSidebarStore((s) => s.toggleUser);
+  const isCollapsed = useSidebarStore((s) => s.collapsed);
+  const toggle = useSidebarStore((s) => s.toggle);
 
   return (
     <Tooltip.Provider delayDuration={300}>
@@ -167,6 +167,7 @@ function SidebarItem({ item, collapsed }: { item: NavItem; collapsed: boolean })
           <Tooltip.Content className="tooltip-content" side="right" sideOffset={8}>
             {label}
             {stub ? <span className="tooltip-meta"> · stub</span> : null}
+            <Tooltip.Arrow className="tooltip-arrow" width={10} height={5} />
           </Tooltip.Content>
         </Tooltip.Portal>
       </Tooltip.Root>

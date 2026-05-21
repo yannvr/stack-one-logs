@@ -1,12 +1,13 @@
 /**
  * Sidebar collapse state.
  *
- * Two concepts:
- *   - userCollapsed: what the user toggled (persisted to localStorage).
- *   - drawerOpen:    transient force-collapse when the detail drawer is open.
+ * Behaviour: when the detail drawer opens, the sidebar collapses. Once
+ * collapsed (whether manually or by drawer-open), it stays collapsed on
+ * subsequent drawer close — re-expanding only happens when the user
+ * explicitly clicks the toggle button. This avoids jarring expand/collapse
+ * cycles when the user is clicking through several rows.
  *
- * The visible state = userCollapsed || drawerOpen. When the drawer closes,
- * the sidebar restores to whatever userCollapsed was.
+ * Persisted across reloads via localStorage.
  */
 
 import { create } from 'zustand';
@@ -21,28 +22,34 @@ function readStored(): boolean {
   }
 }
 
+function persist(collapsed: boolean) {
+  try {
+    localStorage.setItem(STORAGE_KEY, collapsed ? '1' : '0');
+  } catch {
+    /* private mode / ignore */
+  }
+}
+
 interface SidebarStore {
-  userCollapsed: boolean;
-  drawerOpen: boolean;
-  /** Derived visible state. */
+  collapsed: boolean;
   isCollapsed: () => boolean;
-  toggleUser: () => void;
-  setDrawerOpen: (open: boolean) => void;
+  toggle: () => void;
+  /** Called when the detail drawer opens — collapses sidebar one-way. */
+  collapseForDrawer: () => void;
 }
 
 export const useSidebarStore = create<SidebarStore>((set, get) => ({
-  userCollapsed: readStored(),
-  drawerOpen: false,
-  isCollapsed: () => get().userCollapsed || get().drawerOpen,
-  toggleUser: () =>
+  collapsed: readStored(),
+  isCollapsed: () => get().collapsed,
+  toggle: () =>
     set((s) => {
-      const next = !s.userCollapsed;
-      try {
-        localStorage.setItem(STORAGE_KEY, next ? '1' : '0');
-      } catch {
-        /* ignore */
-      }
-      return { userCollapsed: next };
+      const next = !s.collapsed;
+      persist(next);
+      return { collapsed: next };
     }),
-  setDrawerOpen: (open) => set({ drawerOpen: open }),
+  collapseForDrawer: () => {
+    if (get().collapsed) return;
+    persist(true);
+    set({ collapsed: true });
+  },
 }));
