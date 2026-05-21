@@ -73,7 +73,8 @@ function statusClass(status: number): string {
 
 export function LogsTable({ logs, onRowClick, selectedLogId, onReplay, onBatchReplay }: Props) {
   const hoveredBucket = useHoverStore((s) => s.hoveredBucket);
-  const setHoveredBucket = useHoverStore((s) => s.setHoveredBucket);
+  const hoverSource = useHoverStore((s) => s.hoverSource);
+  const hoverFromRow = useHoverStore((s) => s.hoverFromRow);
 
   // A stable "now" anchor per render of the table — keeps bucket assignment
   // deterministic across row mappings and chart bars.
@@ -323,7 +324,12 @@ export function LogsTable({ logs, onRowClick, selectedLogId, onReplay, onBatchRe
               const log = row.original;
               const isSelected = selectedLogId === log.id;
               const rowBucket = timestampToBucketIndex(log.requestedAt, bucketNow);
-              const isBucketHover = rowBucket !== null && hoveredBucket === rowBucket;
+              // Bucket-mate highlight only when the hover came FROM a bar in the
+              // chart. Row-originated hover should highlight only that single
+              // row (handled by the native :hover pseudoclass), never every
+              // other row that happens to share the same time bucket.
+              const isBucketHover =
+                hoverSource === 'bar' && rowBucket !== null && hoveredBucket === rowBucket;
               return (
                 <tr
                   key={row.id}
@@ -331,8 +337,8 @@ export function LogsTable({ logs, onRowClick, selectedLogId, onReplay, onBatchRe
                   data-status={log.status >= 400 ? 'error' : 'success'}
                   data-bucket-hover={isBucketHover || undefined}
                   onClick={() => onRowClick?.(log)}
-                  onMouseEnter={() => rowBucket !== null && setHoveredBucket(rowBucket)}
-                  onMouseLeave={() => setHoveredBucket(null)}
+                  onMouseEnter={() => hoverFromRow(rowBucket)}
+                  onMouseLeave={() => hoverFromRow(null)}
                   tabIndex={0}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {

@@ -89,7 +89,7 @@ type ChartBodyProps = {
 
 function ChartBody({ buckets, width, onBucketClick }: ChartBodyProps) {
   const hoveredBucket = useHoverStore((s) => s.hoveredBucket);
-  const setHoveredBucket = useHoverStore((s) => s.setHoveredBucket);
+  const hoverFromBar = useHoverStore((s) => s.hoverFromBar);
   const gradientId = useId();
 
   const data: BucketRow[] = useMemo(
@@ -226,9 +226,9 @@ function ChartBody({ buckets, width, onBucketClick }: ChartBodyProps) {
                 height={h}
                 rx={2}
                 fill={`url(#${gradientId}-${d.index})`}
-                onMouseEnter={() => setHoveredBucket(d.index)}
+                onMouseEnter={() => hoverFromBar(d.index)}
                 onMouseLeave={() => {
-                  setHoveredBucket(null);
+                  hoverFromBar(null);
                   hideTooltip();
                 }}
                 onMouseMove={(event) => {
