@@ -27,18 +27,14 @@ export function LogsChart({ summary, onBucketClick }: Props) {
   return (
     <section className="chart-card" aria-labelledby="chart-heading">
       <header className="chart-header">
-        <div className="chart-hero">
-          <span className="chart-eyebrow" id="chart-heading">
-            API Requests <span className="dot-sep">·</span> last 12 minutes
-          </span>
-          <span className="chart-hero-value">{formatCount(summary.totals.total)}</span>
-          <span className="chart-hero-delta">
-            <Delta value={summary.totals.totalDelta} />
-            <span className="chart-hero-delta-label">vs prior period</span>
-          </span>
-        </div>
-        <div className="chart-divider" aria-hidden="true" />
+        <h3 className="chart-title" id="chart-heading">API Requests</h3>
         <div className="chart-stats">
+          <Stat
+            label="Total"
+            value={summary.totals.total}
+            delta={summary.totals.totalDelta}
+            dot="neutral"
+          />
           <Stat
             label="Success"
             value={summary.totals.success}
@@ -107,7 +103,7 @@ function ChartBody({
       scaleBand<number>({
         domain: data.map((d) => d.index),
         range: [0, innerWidth],
-        padding: 0.25,
+        padding: 0.18, // denser bars — closer to the Figma density
       }),
     [data, innerWidth],
   );
