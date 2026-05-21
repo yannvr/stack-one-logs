@@ -8,22 +8,26 @@ An interview take on StackOne's **Request Logs** page: a recreation of the Figma
 
 ---
 
-## The vision — a UI-CLI hybrid, installable as a PWA
+## The headline improvement — Scope-to-Slice
 
-The most impactful improvement is not any single feature — it is the shape of the app itself.
+The chart was the most underused surface in the original design: a passive widget sitting above the table with no functional connection to it. The headline improvement promotes it into the **primary investigation control**.
 
-Integration engineers live in two worlds: a **click-driven UI** (good for spotting anomalies on a chart, scanning a row, reading a payload) and a **CLI** (good for speed, repeatability, muscle memory). Traditional dashboards pick one and lose the other.
+**Scope-to-Slice** is the interaction pattern:
 
-This build is a deliberate bridge:
+- **Hover a bar** → the rows in that 12-second bucket get an accent stripe in the table. Hover a row → the matching bar lifts. Eyes never have to context-switch between the two surfaces.
+- **Click a bar** → the table filters to that exact window, the URL captures the slice (`?from=…&to=…`), the chart redraws to that range. One click turns "I see a spike at 14:23" into "show me everything that happened then."
+- **Clear the slice** with a single chip in the filter bar (or back-button — it's URL state).
 
-- **⌘K command palette** — every action, filter, and navigation reachable without leaving the keyboard
-- **`/ j k r esc Enter`** — vim-style row navigation, search focus, refresh, drawer toggle
-- **URL as the source of truth** — every filter, the selected log, the active tab, and the time range live in the URL. The address bar becomes a stateful command line; refresh, back, and link-sharing all just work
-- **Installable PWA** — once installed, opens in its own window, no browser chrome, app-shell precached. The dashboard starts to feel like a native tool
+This is the loop the brief asks for — *spot anomaly → drill in → understand* — collapsed into one gesture. Everything else (surfaced Replay, 4-tier status pills, soft chart palette) supports it. The chart is no longer decoration; it is the lens.
 
-The result is a new kind of internal app: **click when you're exploring, type when you know where you're going**. Speed of a CLI, legibility of a UI, ergonomics of a desktop app — without leaving the browser.
+> A chart that filters the data beneath it is the difference between a dashboard and an investigation tool.
 
-The rest of the improvements (chart↔table sync, surfaced Replay, 4-tier status pills, soft chart palette) all serve the same north star: shorten the *anomaly → fix* loop.
+### Supporting improvements
+
+- **URL-synced state** — every filter, the slice, the selected log, the active tab live in the URL. Refresh, back, and link-sharing all just work, and a chart slice becomes a shareable artifact.
+- **Surfaced Replay on row hover** — the daily action moves from "two clicks behind a `…` menu" to one click on the row.
+- **4-tier status pills with non-color signal** — 2xx ✓ / 3xx ⇄ / 4xx ⚠ / 5xx ✕. Client vs server failures distinguishable at a glance. WCAG 1.4.1.
+- **⌘K command palette, vim-style shortcuts, installable PWA** — opt-in power-user surface for after the click-driven flow is internalised. Speed without taking anything away from discoverability.
 
 ---
 
@@ -46,12 +50,13 @@ The mock data layer simulates 800–1200ms of network latency so skeleton states
 
 **Recreation of all 30 Figma frames** as a single working app: chart + filterable table + detail drawer, empty / loading / expanded states, Request/Response accordions, underlying-requests tab, expiry variants, and the full AI Error Explainer state machine (gated → collapsed → generating → generated → feedback → submitted).
 
-**Improvements shipped on top** (see [docs/improvements.md](docs/improvements.md)):
+**Improvements shipped on top** (see [docs/improvements.md](docs/improvements.md)) — detailed above:
 
-1. **UI-CLI hybrid** — ⌘K palette, vim-style shortcuts, URL-synced state, installable PWA *(see vision above)*
-2. **Chart ↔ table sync** — hover a row, the matching bar lifts; hover a bar, the rows in that bucket get an accent; click a bar to filter to that 12-second window
-3. **Surfaced Replay on row hover** — the daily action moves from "two clicks behind a `…` menu" to one click on the row
-4. **4-tier status pills with non-color signal** — 2xx ✓ / 3xx ⇄ / 4xx ⚠ / 5xx ✕. Operations can scan client vs server failures at a glance. WCAG 1.4.1
+1. **Scope-to-Slice** — chart ↔ table hover sync and click-to-filter as the primary investigation pattern
+2. **URL-synced state** — every filter, slice, selected log, and active tab live in the URL
+3. **Surfaced Replay** on row hover
+4. **4-tier status pills** with non-color signal
+5. **⌘K palette + shortcuts + PWA** — power-user surface layered on top
 
 The Figma's frozen-timestamp pattern (every row showing `21:05:19.123`) is replaced by realistic varied timestamps from Faker — see [docs/critique.md § 1.1](docs/critique.md).
 

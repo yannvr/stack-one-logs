@@ -1,4 +1,4 @@
-import { BookOpen, Command as CommandIcon } from '@phosphor-icons/react';
+import { Command as CommandIcon, FileDoc } from '@phosphor-icons/react';
 import { Tooltip } from '~/components/primitives/Tooltip';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -17,8 +17,8 @@ export function TopBar({ title }: Props) {
           </span>
         </Tooltip>
         <ThemeToggle />
-        <a className="outline" href="https://docs.stackone.com" target="_blank" rel="noreferrer">
-          <BookOpen size={14} weight="regular" />
+        <a className="outline docs-button" href="https://docs.stackone.com" target="_blank" rel="noreferrer">
+          <FileDoc size={13} weight="regular" />
           <span>Docs</span>
         </a>
       </div>
