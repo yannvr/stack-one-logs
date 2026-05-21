@@ -1242,26 +1242,63 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Figma frame 01: "API Requests" on the left, Total/Success/Error inline on the right. */
+/* Summary lede on the left (Total as the editorial focal point), Success and
+   Error as compact inline stats on the right. */
 .chart-header {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: var(--space-5);
+  gap: var(--space-6);
   margin-bottom: var(--space-3);
 }
 
-.chart-title {
-  font-size: var(--text-md);
-  font-weight: var(--weight-medium);
-  color: var(--color-text-primary);
-  letter-spacing: 0;
+.chart-lede {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
 }
 
+.chart-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 10px;
+  font-weight: var(--weight-medium);
+  color: var(--color-text-muted);
+}
+.chart-eyebrow .dot-sep {
+  margin: 0 var(--space-1);
+  opacity: 0.5;
+}
+
+.chart-lede-value {
+  font-weight: var(--weight-semibold);
+  font-size: 36px;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-primary);
+  margin-top: 4px;
+}
+
+.chart-lede-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+.chart-lede-delta-label {
+  font-style: italic;
+}
+
+/* Success / Error compact inline cluster on the right. */
 .chart-stats {
   display: inline-flex;
   align-items: center;
   gap: var(--space-5);
+  padding-bottom: 6px; /* aligns visually with the lede's delta baseline */
 }
 
 .stat {

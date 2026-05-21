@@ -15,8 +15,10 @@ const KEYS = ['success', 'error'] as const;
 type Key = (typeof KEYS)[number];
 
 const VIEWBOX_WIDTH = 1024;
-const VIEWBOX_HEIGHT = 200;
-const MARGIN = { top: 12, right: 12, bottom: 22, left: 36 };
+const VIEWBOX_HEIGHT = 220;
+// Bottom margin sized to give x-axis tick labels enough breathing room — was
+// 22 which left labels half-clipped against the card border.
+const MARGIN = { top: 12, right: 12, bottom: 32, left: 36 };
 
 type Props = {
   summary: ChartSummary;
@@ -27,14 +29,17 @@ export function LogsChart({ summary, onBucketClick }: Props) {
   return (
     <section className="chart-card" aria-labelledby="chart-heading">
       <header className="chart-header">
-        <h3 className="chart-title" id="chart-heading">API Requests</h3>
+        <div className="chart-lede">
+          <span className="chart-eyebrow" id="chart-heading">
+            API Requests <span className="dot-sep">·</span> last 12 minutes
+          </span>
+          <span className="chart-lede-value">{formatCount(summary.totals.total)}</span>
+          <span className="chart-lede-delta">
+            <Delta value={summary.totals.totalDelta} />
+            <span className="chart-lede-delta-label">vs prior period</span>
+          </span>
+        </div>
         <div className="chart-stats">
-          <Stat
-            label="Total"
-            value={summary.totals.total}
-            delta={summary.totals.totalDelta}
-            dot="neutral"
-          />
           <Stat
             label="Success"
             value={summary.totals.success}
