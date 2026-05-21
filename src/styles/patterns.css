@@ -183,9 +183,12 @@
   z-index: var(--z-overlay);
   animation: tooltip-in var(--motion-fast) var(--ease-out);
 }
+/* In dark mode, invert: a light card on a dark canvas reads as a clear
+   overlay rather than disappearing into the page. */
 :root[data-theme='dark'] .tooltip-content {
-  background: var(--grey-700);
-  border: 1px solid var(--grey-600);
+  background: var(--grey-100);
+  color: var(--grey-950);
+  border: 1px solid var(--grey-300);
 }
 .tooltip-content[data-state='closed'] { animation: tooltip-out var(--motion-fast) var(--ease-out); }
 
@@ -193,7 +196,10 @@
   fill: var(--grey-950);
 }
 :root[data-theme='dark'] .tooltip-arrow {
-  fill: var(--grey-700);
+  fill: var(--grey-100);
+}
+:root[data-theme='dark'] .tooltip-meta {
+  color: var(--grey-500);
 }
 
 .tooltip-meta {
@@ -1044,6 +1050,21 @@
 }
 .toast[data-state='closed'] { animation: toast-out var(--motion-fast) var(--ease-out); }
 
+/* Mirror the tooltip inversion: a light pill on a dark canvas pops. */
+:root[data-theme='dark'] .toast {
+  background: var(--grey-100);
+  color: var(--grey-950);
+  border: 1px solid var(--grey-300);
+}
+:root[data-theme='dark'] .toast-action {
+  color: var(--grey-950);
+  background: rgb(0 0 0 / 0.06);
+  border-color: rgb(0 0 0 / 0.12);
+}
+:root[data-theme='dark'] .toast-action:hover {
+  background: rgb(0 0 0 / 0.12);
+}
+
 .toast-title {
   display: inline-flex;
   align-items: center;
@@ -1495,6 +1516,11 @@
   border-radius: var(--radius-md);
   pointer-events: none;
   box-shadow: var(--shadow-lg);
+}
+:root[data-theme='dark'] .chart-tooltip {
+  background: var(--grey-100);
+  color: var(--grey-950);
+  border: 1px solid var(--grey-300);
 }
 
 .chart-tooltip-row {
