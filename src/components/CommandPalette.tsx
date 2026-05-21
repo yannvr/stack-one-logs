@@ -60,10 +60,30 @@ export function CommandPalette({
   }
 
   return (
-    <Dialog.Root open={open} onOpenChange={setOpen}>
+    // modal={false} skips Radix's body scroll-lock. The palette is small,
+    // centred, and dismissible — it doesn't need to seize scroll. Locking
+    // would also remove the page scrollbar, which visually shifts everything
+    // including the fixed-positioned detail drawer if it's open behind.
+    <Dialog.Root open={open} onOpenChange={setOpen} modal={false}>
       <Dialog.Portal>
         <Dialog.Overlay className="cmdk-overlay" />
-        <Dialog.Content className="cmdk-content" aria-describedby={undefined}>
+        <Dialog.Content
+          className="cmdk-content"
+          aria-describedby={undefined}
+          onOpenAutoFocus={(e) => {
+            // Default focus moves into the Dialog; we want focus on the search
+            // input inside cmdk, which cmdk handles itself.
+            e.preventDefault();
+            const input = document.querySelector<HTMLInputElement>('.cmdk-input-wrap input');
+            input?.focus();
+          }}
+          onInteractOutside={(e) => {
+            // With modal={false}, outside-click on a focused element doesn't
+            // automatically close. Keep the close behavior intact.
+            setOpen(false);
+            e.preventDefault();
+          }}
+        >
           <Dialog.Title className="sr-only">Command palette</Dialog.Title>
           <Command label="Command palette" className="cmdk-root">
             <div className="cmdk-input-wrap">
