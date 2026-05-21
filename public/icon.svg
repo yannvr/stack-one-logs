@@ -1,8 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- StackOne stacked-cards mark, brand green. Designed to read at 192px+ -->
-  <g transform="translate(256 256) scale(20) translate(-12 -12)">
-    <path d="M3 7l9-5 9 5-9 5-9-5z" fill="#00AF66"/>
-    <path d="M3 12l9 5 9-5" stroke="#00AF66" stroke-width="1.5" fill="none" opacity="0.55" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M3 17l9 5 9-5" stroke="#00AF66" stroke-width="1.5" fill="none" opacity="0.3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Square icon canvas. Official StackOne mark, centred and scaled to ~70%
+       of the canvas with white background. -->
+  <rect width="512" height="512" fill="#FFFFFF"/>
+  <g transform="translate(80 184) scale(14.6667)">
+    <path d="M7.99992 4.66667H16V0H12.1786C9.87074 0 7.99992 0 7.99992 2.44709V4.66667Z" fill="url(#g0)"/>
+    <path d="M16 9.33328H7.99992V13.9999H11.8213C14.129 13.9999 16 13.9999 16 11.5529V9.33328Z" fill="url(#g1)"/>
+    <path d="M16 0H8.02667H0L3.91802e-07 9.33334H8.02667V4.66751L8.02555 4.46984C8.01146 2.00536 10.0054 0 12.4699 0H16Z" fill="#00AF66"/>
+    <path d="M7.99992 13.9999H15.9732H23.9999V4.66664H15.9732V9.33246L15.9744 9.53012C15.9884 11.9946 13.9945 13.9999 11.53 13.9999H7.99992Z" fill="#00AF66"/>
   </g>
+  <defs>
+    <linearGradient id="g0" x1="16" y1="2.33333" x2="7.99992" y2="2.33333" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00AF66"/>
+      <stop offset="1" stop-color="#285C4D"/>
+    </linearGradient>
+    <linearGradient id="g1" x1="7.99992" y1="11.6666" x2="16" y2="11.6666" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00AF66"/>
+      <stop offset="1" stop-color="#285C4D"/>
+    </linearGradient>
+  </defs>
 </svg>

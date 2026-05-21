@@ -75,10 +75,22 @@ export function Sidebar() {
         <Tooltip content="Production [EU1]" side="right" enabled={isCollapsed}>
           <button type="button" className="env-switcher" aria-label="Switch environment">
             <span className="env-mark" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
-                <path d="M3 7l9-5 9 5-9 5-9-5z" fill="var(--color-accent)" />
-                <path d="M3 12l9 5 9-5" stroke="var(--color-accent)" strokeWidth="1.5" opacity="0.55" />
-                <path d="M3 17l9 5 9-5" stroke="var(--color-accent)" strokeWidth="1.5" opacity="0.3" />
+              {/* Official StackOne logo (24×14), extracted from the Figma source. */}
+              <svg viewBox="0 0 24 14" width="24" height="14" fill="none">
+                <path d="M7.99992 4.66667H16V0H12.1786C9.87074 0 7.99992 0 7.99992 2.44709V4.66667Z" fill="url(#sb-grad-top)"/>
+                <path d="M16 9.33328H7.99992V13.9999H11.8213C14.129 13.9999 16 13.9999 16 11.5529V9.33328Z" fill="url(#sb-grad-bottom)"/>
+                <path d="M16 0H8.02667H0L3.91802e-07 9.33334H8.02667V4.66751L8.02555 4.46984C8.01146 2.00536 10.0054 0 12.4699 0H16Z" fill="#00AF66"/>
+                <path d="M7.99992 13.9999H15.9732H23.9999V4.66664H15.9732V9.33246L15.9744 9.53012C15.9884 11.9946 13.9945 13.9999 11.53 13.9999H7.99992Z" fill="#00AF66"/>
+                <defs>
+                  <linearGradient id="sb-grad-top" x1="16" y1="2.33333" x2="7.99992" y2="2.33333" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#00AF66"/>
+                    <stop offset="1" stopColor="#285C4D"/>
+                  </linearGradient>
+                  <linearGradient id="sb-grad-bottom" x1="7.99992" y1="11.6666" x2="16" y2="11.6666" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#00AF66"/>
+                    <stop offset="1" stopColor="#285C4D"/>
+                  </linearGradient>
+                </defs>
               </svg>
             </span>
             <span className="env-name">Production [EU1]</span>
