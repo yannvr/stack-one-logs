@@ -52,4 +52,7 @@ export default defineConfig({
     },
   },
   server: { port: 5173, host: true },
+  preview: {
+    allowedHosts: ['stack-one.hyperdrift.io'],
+  },
 });
